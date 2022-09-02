@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pooping_flutter_app/sign_up_page.dart';
-
-import 'forget_password_page.dart';
 import 'http_request.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -28,14 +25,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> get_fortune() async {
-    String response = await send_login_request(emailController.text,
-        passwordController.text);
+    String response = await get_fortune_();
 
     if (response.compareTo('YES') == 0) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Home Page',)),
-      );
+      print("Can not login " + response );
     }
     else {
       print("Can not login ");
@@ -52,28 +45,14 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'E-mail',
-              ),
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Password',
-              ),
-            ),
             TextButton(
               style: TextButton.styleFrom(
                 textStyle: const TextStyle(fontSize: 20),
               ),
               onPressed: (){
-                send_login_info();
+                get_fortune();
               },
-              child: const Text('Log In'),
+              child: const Text('Get Fortune'),
             ),
           ],
         ),
