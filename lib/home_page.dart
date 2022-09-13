@@ -13,20 +13,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is disposed.
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
-
   Future<void> get_fortune() async {
     String response = await get_fortune_();
-
+    print("BUTTON PRESSED");
     if (response.compareTo('YES') == 0) {
       print("Can not login " + response );
     }

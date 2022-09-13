@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-String base_url = 'http://localhost:5005/api';
+String base_url = 'http://localhost:8000/fortune_teller/v1/';
 
 Future<String> send_get_request(endPoint) async {
   final http.Response response;
@@ -17,8 +17,13 @@ Future<String> send_get_request(endPoint) async {
     response = await http.get(Uri.parse(url),);
   }
   */
-  if (response.statusCode == 200) { return response.body;}
-  else {throw Exception('Failed HTTP REQUEST');}
+  if (response.statusCode == 200) {
+    print(response);
+    return response.body;
+  }
+  else {
+    throw Exception('Failed HTTP REQUEST');
+  }
 }
 
 
