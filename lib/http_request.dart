@@ -18,7 +18,7 @@ Future<String> send_get_request(endPoint) async {
   }
   */
   if (response.statusCode == 200) {
-    print(response);
+    print(response.body);
     return response.body;
   }
   else {

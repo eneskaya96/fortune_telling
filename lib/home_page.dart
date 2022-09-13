@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'http_request.dart';
 
@@ -13,14 +15,21 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  String textHolder = 'YOUR FORTUNE: ...';
+
+
   Future<void> get_fortune() async {
     String response = await get_fortune_();
-    print("BUTTON PRESSED");
-    if (response.compareTo('YES') == 0) {
-      print("Can not login " + response );
+    if (response.isNotEmpty) {
+      setState(() {
+        dynamic jj = jsonDecode(response);
+        print(jj.runtimeType);
+        print(jj['data']['fortune']);
+        textHolder = jj['data']['fortune'];
+      });
     }
     else {
-      print("Can not login ");
+      print("RESPONSE can not obtained ");
     }
   }
 
@@ -42,6 +51,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 get_fortune();
               },
               child: const Text('Get Fortune'),
+            ),
+            Container(
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                child: Text('$textHolder',
+                    style: TextStyle(fontSize: 21)
+                )
             ),
           ],
         ),
