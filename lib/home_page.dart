@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-//import 'http_request.dart';
+import 'http_request.dart';
 import 'ad_helper.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -66,8 +66,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-
-  /*
   Future<void> get_fortune() async {
     String response = await get_fortune_();
     if (response.isNotEmpty) {
@@ -82,8 +80,6 @@ class _MyHomePageState extends State<MyHomePage> {
       print("RESPONSE can not obtained ");
     }
   }
-
-   */
 
   @override
   Widget build(BuildContext context) {
@@ -100,8 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 textStyle: const TextStyle(fontSize: 20),
               ),
               onPressed: () {
-                //get_fortune();
-                print("xmnxnxnxnxn");
+                get_fortune();
               },
               child: const Text('Get Fortune'),
             ),
