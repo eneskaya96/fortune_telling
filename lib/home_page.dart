@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'http_request.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+//import 'http_request.dart';
+import 'ad_helper.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -14,10 +16,58 @@ class MyHomePage extends StatefulWidget {
 
 
 class _MyHomePageState extends State<MyHomePage> {
-
   String textHolder = 'YOUR FORTUNE: ...';
 
+  late BannerAd _ad;
+  late bool isLoaded;
 
+  @override
+  void initState() {
+    super.initState();
+
+    _ad = BannerAd(
+      size: AdSize.banner,
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: AdRequest(),
+      listener: BannerAdListener(
+          onAdLoaded: (_) {
+            setState(() {
+              isLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (_, error) {
+            print("Ad failed to load error $error");
+          }
+      ),
+    );
+
+    _ad.load();
+  }
+
+  @override
+  void dispose() {
+    _ad.dispose();
+    super.dispose();
+  }
+
+  Widget checkForAd() {
+    if (isLoaded = true) {
+      return Container(
+        width: _ad.size.width.toDouble(),
+        height: _ad.size.height.toDouble(),
+        alignment: Alignment.center,
+        child: AdWidget(
+          ad: _ad,
+        ),
+      );
+    }
+    else {
+      return CircularProgressIndicator();
+    }
+  }
+
+
+  /*
   Future<void> get_fortune() async {
     String response = await get_fortune_();
     if (response.isNotEmpty) {
@@ -33,6 +83,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+   */
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,8 +99,9 @@ class _MyHomePageState extends State<MyHomePage> {
               style: TextButton.styleFrom(
                 textStyle: const TextStyle(fontSize: 20),
               ),
-              onPressed: (){
-                get_fortune();
+              onPressed: () {
+                //get_fortune();
+                print("xmnxnxnxnxn");
               },
               child: const Text('Get Fortune'),
             ),
@@ -58,9 +111,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: TextStyle(fontSize: 21)
                 )
             ),
+            checkForAd(),
           ],
         ),
       ),
     );
   }
 }
+
+
