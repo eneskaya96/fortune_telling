@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -19,39 +20,50 @@ class _MyHomePageState extends State<MyHomePage> {
   String textHolder = 'YOUR FORTUNE: ...';
 
   late BannerAd _ad;
-  late bool isLoaded;
+  bool isLoaded = false;
 
   @override
   void initState() {
+
+    // Admod initialized if mobile
+    if (Platform.isAndroid || Platform.isIOS) {
+      WidgetsFlutterBinding.ensureInitialized();
+      MobileAds.instance.initialize();
+    }
+
     super.initState();
 
-    _ad = BannerAd(
-      size: AdSize.banner,
-      adUnitId: AdHelper.bannerAdUnitId,
-      request: AdRequest(),
-      listener: BannerAdListener(
-          onAdLoaded: (_) {
-            setState(() {
-              isLoaded = true;
-            });
-          },
-          onAdFailedToLoad: (_, error) {
-            print("Ad failed to load error $error");
-          }
-      ),
-    );
+    if (AdHelper.bannerAdUnitId != "UnsupportedPlatform"){
+      _ad = BannerAd(
+        size: AdSize.banner,
+        adUnitId: AdHelper.bannerAdUnitId,
+        request: AdRequest(),
+        listener: BannerAdListener(
+            onAdLoaded: (_) {
+              setState(() {
+                isLoaded = true;
+              });
+            },
+            onAdFailedToLoad: (_, error) {
+              print("Ad failed to load error $error");
+            }
+        ),
+      );
 
-    _ad.load();
+      _ad.load();
+    }
   }
 
   @override
   void dispose() {
-    _ad.dispose();
+    if (Platform.isAndroid || Platform.isIOS) {
+      _ad.dispose();
+    }
     super.dispose();
   }
 
   Widget checkForAd() {
-    if (isLoaded = true) {
+    if (isLoaded = true &  Platform.isAndroid || Platform.isIOS ) {
       return Container(
         width: _ad.size.width.toDouble(),
         height: _ad.size.height.toDouble(),
