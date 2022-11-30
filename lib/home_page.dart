@@ -30,7 +30,6 @@ class _MyHomePageState extends State<MyHomePage> {
       WidgetsFlutterBinding.ensureInitialized();
       MobileAds.instance.initialize();
     }
-
     super.initState();
 
     if (AdHelper.bannerAdUnitId != "UnsupportedPlatform"){
@@ -100,28 +99,30 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: const TextStyle(fontSize: 20),
+        child: Container(
+          child: Column(
+            children: <Widget>[
+              IconButton(
+                icon: Image.asset('images/button.png'),
+                iconSize: 200,
+                color: Colors.white,
+                onPressed: () {
+                  get_fortune();
+                },
               ),
-              onPressed: () {
-                get_fortune();
-              },
-              child: const Text('Get Fortune'),
-            ),
-            Container(
-                padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                child: Text('$textHolder',
-                    style: TextStyle(fontSize: 21)
-                )
-            ),
-            checkForAd(),
-          ],
+              Container(
+                  padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  child: Text('$textHolder',
+                      style: TextStyle(fontSize: 21)
+                  )
+              ),
+              checkForAd(),
+            ],
+          )
+
         ),
       ),
+
     );
   }
 }
