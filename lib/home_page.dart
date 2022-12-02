@@ -17,7 +17,7 @@ class MyHomePage extends StatefulWidget {
 
 
 class _MyHomePageState extends State<MyHomePage> {
-  String textHolder = 'YOUR FORTUNE: ...';
+  String textHolder = 'a';
 
   late BannerAd _ad;
   bool isLoaded = false;
@@ -61,6 +61,29 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+
+  Future<String?> result_fortune() {
+    return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('AlertDialog Title'),
+            content:  Text(textHolder),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'Cancel'),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        }
+    );
+  }
+
   Widget checkForAd() {
     if (isLoaded = true &  Platform.isAndroid || Platform.isIOS ) {
       return Container(
@@ -85,6 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
         print(jj.runtimeType);
         print(jj['data']['fortune']);
         textHolder = jj['data']['fortune'];
+        result_fortune();
       });
     }
     else {
@@ -111,21 +135,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   get_fortune();
                 },
               ),
-              Container(
-                  padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
-                  child: Text('$textHolder',
-                      style: TextStyle(fontSize: 21)
-                  )
-              ),
               checkForAd(),
             ],
           )
-
         ),
       ),
 
     );
   }
 }
-
-
