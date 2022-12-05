@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "686025021077",
+    "project_id": "fortune-teller-51cd4",
+    "storage_bucket": "fortune-teller-51cd4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:686025021077:android:c9431066bc62848169ed9c",
+        "android_client_info": {
+          "package_name": "com.menesek.fortune_telling"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "686025021077-6q12ccq2n428fav6laidchr1i0p42j77.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_lN8AEZGS5n1OiPmn0ABkQgQHCFcFZ2k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "686025021077-6q12ccq2n428fav6laidchr1i0p42j77.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
