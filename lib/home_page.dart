@@ -1,13 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'http_request.dart';
 import 'ad_helper.dart';
-import 'main.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -20,13 +19,24 @@ class MyHomePage extends StatefulWidget {
 
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  String imagePath = "images/gift.gif";
+
   String textHolder = 'a';
+
+  late Timer timer;
 
   late BannerAd _ad;
   bool isLoaded = false;
 
   @override
   void initState() {
+    timer = Timer.periodic(Duration(seconds: 1), (Timer t) =>
+        setState(() {
+          textHolder = DateTime.now().toIso8601String();
+          print(textHolder);
+        }));
+
     // Admod initialized if mobile
     if (Platform.isAndroid || Platform.isIOS) {
       WidgetsFlutterBinding.ensureInitialized();
@@ -134,13 +144,16 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Container(
           child: Column(
             children: <Widget>[
-              IconButton(
-                icon: Image.asset('images/button.png'),
-                iconSize: 200,
-                color: Colors.white,
-                onPressed: () {
+              GestureDetector(
+                onTap: () {
                   get_fortune();
-                },
+                }, // Image tapped
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  height: MediaQuery.of(context).size.height
+                      - 4 * AdSize.banner.height ,
+                ),
               ),
               checkForAd(),
             ],
