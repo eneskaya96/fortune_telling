@@ -18,3 +18,7 @@ add this to .yaml
 then run this 
 
     flutter pub run flutter_launcher_icons 
+
+#### Notification 
+
+    https://medium.com/@alaa07996/firebase-push-notifications-with-flutter-6848892a1c15
