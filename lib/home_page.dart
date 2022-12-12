@@ -167,7 +167,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Colors.deepPurpleAccent,
@@ -184,11 +183,12 @@ class _MyHomePageState extends State<MyHomePage> {
                           get_fortune();
                           controller.play();
                         }, // Image tapped
-                        child: AspectRatio(
-                          aspectRatio: 0.60,
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width ,
+                          height: MediaQuery.of(context).size.height,
                           child: VideoPlayer(controller),
                         ),
-                      ),
+                    ),
                     Container(
                         alignment: Alignment.center,
                         child: Text(
