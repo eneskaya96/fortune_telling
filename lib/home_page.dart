@@ -5,6 +5,7 @@ import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:video_player/video_player.dart';
 import 'http_request.dart';
 import 'ad_helper.dart';
 
@@ -20,21 +21,50 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  String imagePath = "images/gift.gif";
+  late VideoPlayerController controller;
 
-  String textHolder = 'a';
+  String fortune = "";
+  String textHolder = "";
 
   late Timer timer;
 
   late BannerAd _ad;
   bool isLoaded = false;
 
+
+
+  loadVideoPlayer(){
+    controller = VideoPlayerController.asset('images/animation.mp4');
+    controller.addListener(() {
+      setState(() {});
+    });
+    controller.initialize().then((value){
+      setState(() {});
+    });
+
+  }
+
+
   @override
   void initState() {
-    timer = Timer.periodic(Duration(seconds: 1), (Timer t) =>
+    loadVideoPlayer();
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
         setState(() {
-          textHolder = DateTime.now().toIso8601String();
+          //textHolder = DateTime.now().toIso8601String();
           print(textHolder);
+
+          if(controller.value.position >=
+              controller.value.duration - const Duration(seconds: 9) &&
+              controller.value.position <
+                controller.value.duration - const Duration(seconds: 2)) {
+            print('video almost Ended');
+            textHolder = fortune;
+          }
+          else if(controller.value.position >=
+              controller.value.duration - const Duration(seconds: 2) ) {
+            print('video Ended');
+            textHolder = '';
+          }
         }));
 
     // Admod initialized if mobile
@@ -124,8 +154,8 @@ class _MyHomePageState extends State<MyHomePage> {
         dynamic jj = jsonDecode(response);
         print(jj.runtimeType);
         print(jj['data']['fortune']);
-        textHolder = jj['data']['fortune'];
-        result_fortune();
+        fortune = jj['data']['fortune'];
+        //result_fortune();
       });
     }
     else {
@@ -133,34 +163,48 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Colors.deepPurpleAccent,
       ),
       body: Center(
-        child: Container(
-          child: Column(
-            children: <Widget>[
-              GestureDetector(
-                onTap: () {
-                  get_fortune();
-                }, // Image tapped
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                  height: MediaQuery.of(context).size.height
-                      - 4 * AdSize.banner.height ,
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child:
+                Stack(
+                  children: [
+                    GestureDetector(
+                        onTap: () {
+                          get_fortune();
+                          controller.play();
+                        }, // Image tapped
+                        child: AspectRatio(
+                          aspectRatio: 0.60,
+                          child: VideoPlayer(controller),
+                        ),
+                      ),
+                    Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                          textHolder,
+                          style: const TextStyle(color: Colors.pink, fontWeight: FontWeight.bold, fontSize: 22.0),
+                        )
+                    ),
+                  ]
                 ),
-              ),
-              checkForAd(),
-            ],
-          )
-        ),
+            ),
+            checkForAd(),
+          ],
+        )
       ),
-
     );
   }
 }
+
+

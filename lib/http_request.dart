@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
-String base_url = 'http://localhost:8000/fortune_teller/v1/';
+String base_url = 'http://3.82.97.42:8000/fortune_teller/v1/';
 //String base_url = 'https://www.google.com.tr/?hl=tr';
 
 Future<String> send_get_request(endPoint) async {
