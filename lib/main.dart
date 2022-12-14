@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Fortune Teller Home Page '),
+      home: const MyHomePage(title: "TODAY's MOTTO"),
     );
   }
 }

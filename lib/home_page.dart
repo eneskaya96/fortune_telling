@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:universal_io/io.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -22,26 +23,23 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   late VideoPlayerController controller;
-
-  String fortune = "";
-  String textHolder = "";
-
   late Timer timer;
 
   late BannerAd _ad;
   bool isLoaded = false;
 
+  String fortune = "";
+  String textHolder = "";
 
 
   loadVideoPlayer(){
-    controller = VideoPlayerController.asset('images/animation.mp4');
+    controller = VideoPlayerController.asset('images/newnew.mp4');
     controller.addListener(() {
       setState(() {});
     });
     controller.initialize().then((value){
       setState(() {});
     });
-
   }
 
 
@@ -90,7 +88,6 @@ class _MyHomePageState extends State<MyHomePage> {
             }
         ),
       );
-
       _ad.load();
     }
   }
@@ -108,29 +105,6 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-
-  Future<String?> result_fortune() {
-    return showDialog<String>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('AlertDialog Title'),
-            content:  Text(textHolder),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.pop(context, 'Cancel'),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        }
-    );
-  }
-
   Widget checkForAd() {
     if (isLoaded = true &  Platform.isAndroid || Platform.isIOS ) {
       return Container(
@@ -142,9 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
     }
-    else {
-      return CircularProgressIndicator();
-    }
+    else { return CircularProgressIndicator(); }
   }
 
   Future<void> get_fortune() async {
@@ -152,15 +124,9 @@ class _MyHomePageState extends State<MyHomePage> {
     if (response.isNotEmpty) {
       setState(() {
         dynamic jj = jsonDecode(response);
-        print(jj.runtimeType);
-        print(jj['data']['fortune']);
         fortune = jj['data']['fortune'];
-        //result_fortune();
       });
-    }
-    else {
-      print("RESPONSE can not obtained ");
-    }
+    } else { print("RESPONSE can not obtained "); }
   }
 
 
@@ -169,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Colors.deepPurpleAccent,
+        backgroundColor: Colors.pink,
       ),
       body: Center(
         child: Column(
@@ -184,8 +150,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           controller.play();
                         }, // Image tapped
                         child: SizedBox(
-                          width: MediaQuery.of(context).size.width ,
-                          height: MediaQuery.of(context).size.height,
                           child: VideoPlayer(controller),
                         ),
                     ),
@@ -193,7 +157,13 @@ class _MyHomePageState extends State<MyHomePage> {
                         alignment: Alignment.center,
                         child: Text(
                           textHolder,
-                          style: const TextStyle(color: Colors.pink, fontWeight: FontWeight.bold, fontSize: 22.0),
+                          style: GoogleFonts.montserrat(
+                            textStyle: Theme.of(context).textTheme.headline4,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: const Color.fromRGBO(255, 255, 255, 0.7),
+                            fontStyle: FontStyle.italic,
+                          ),
                         )
                     ),
                   ]
