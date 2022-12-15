@@ -7,13 +7,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:video_player/video_player.dart';
+import 'file_operations.dart';
 import 'http_request.dart';
 import 'ad_helper.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title, required this.storage}) : super(key: key);
 
   final String title;
+  final CounterStorage storage;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -30,6 +32,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String fortune = "";
   String textHolder = "";
+  String timeTextHolder = "XXX";
+  late DateTime readed_time ;
 
 
   loadVideoPlayer(){
@@ -45,12 +49,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    widget.storage.readTime().then((value) {
+      setState(() {
+        readed_time = DateTime.parse(value);
+      });
+    });
     loadVideoPlayer();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
         setState(() {
           //textHolder = DateTime.now().toIso8601String();
-          print(textHolder);
+          var now = DateTime.now();
+          print(now.toIso8601String() + "now");
+          print(readed_time);
 
+          var how_much_time_passed = now.difference(readed_time);
+          var twenty_four_hour = const Duration(hours: 24);
+          var remaining_time = twenty_four_hour - how_much_time_passed ;
+          print(remaining_time);
+          String sDuration = "${remaining_time.inHours}:${remaining_time.inMinutes.remainder(60)}:${(remaining_time.inSeconds.remainder(60))}";
+          timeTextHolder = sDuration;
+
+          // Write time to
           if(controller.value.position >=
               controller.value.duration - const Duration(seconds: 9) &&
               controller.value.position <
@@ -64,7 +83,6 @@ class _MyHomePageState extends State<MyHomePage> {
             textHolder = '';
           }
         }));
-
     // Admod initialized if mobile
     if (Platform.isAndroid || Platform.isIOS) {
       WidgetsFlutterBinding.ensureInitialized();
@@ -147,6 +165,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     GestureDetector(
                         onTap: () {
                           get_fortune();
+                          DateTime time = DateTime.now();
+                          widget.storage.writeTime(time.toIso8601String());
+                          readed_time = time;
                           controller.play();
                         }, // Image tapped
                         child: SizedBox(
@@ -162,7 +183,18 @@ class _MyHomePageState extends State<MyHomePage> {
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
                             color: const Color.fromRGBO(255, 255, 255, 0.7),
-                            fontStyle: FontStyle.italic,
+                          ),
+                        )
+                    ),
+                    Container(
+                        alignment: Alignment.topCenter,
+                        child: Text(
+                          timeTextHolder,
+                          style: GoogleFonts.montserrat(
+                            textStyle: Theme.of(context).textTheme.headline4,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: const Color.fromRGBO(0, 0, 0, 0.7),
                           ),
                         )
                     ),
