@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:fortune_telling/result_page.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class _TransitionPageState extends State<TransitionPage> {
 
   late BannerAd _ad;
   bool isLoaded = false;
+  var readed_time;
 
   loadVideoPlayer(){
     controller = VideoPlayerController.asset('images/transit.mp4');
@@ -41,18 +43,36 @@ class _TransitionPageState extends State<TransitionPage> {
 
   @override
   void initState() {
+    widget.storage.readTime().then((value) {
+      setState(() {
+        readed_time = DateTime.parse(value);
+      });
+    });
     loadVideoPlayer();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
         setState(() {
           // video ended
           if(controller.value.position == controller.value.duration) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context)
-              =>  MyHomePage(title: "TT",
-                  storage: widget.storage)),
-            );
-            timer.cancel();
+            String remaining_time = widget.storage.getRemainigTime(readed_time);
+            if (remaining_time != "0:0:0") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context)
+                =>  MyHomePage(title: "TT",
+                    storage: widget.storage)),
+              );
+              timer.cancel();
+            }
+            else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context)
+                =>  ResultPage(title: "RESULT",
+                    storage: widget.storage)),
+              );
+              timer.cancel();
+            }
+
           }
         }));
 

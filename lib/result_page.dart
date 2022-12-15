@@ -11,18 +11,18 @@ import 'file_operations.dart';
 import 'http_request.dart';
 import 'ad_helper.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title, required this.storage}) : super(key: key);
+class ResultPage extends StatefulWidget {
+  const ResultPage({Key? key, required this.title, required this.storage}) : super(key: key);
 
   final String title;
   final CounterStorage storage;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<ResultPage> createState() => _ResultPageState();
 }
 
 
-class _MyHomePageState extends State<MyHomePage> {
+class _ResultPageState extends State<ResultPage> {
 
   late VideoPlayerController controller;
   late Timer timer;
@@ -58,7 +58,16 @@ class _MyHomePageState extends State<MyHomePage> {
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
         setState(() {
           //textHolder = DateTime.now().toIso8601String();
-          timeTextHolder = widget.storage.getRemainigTime(readed_time);
+          var now = DateTime.now();
+          print(now.toIso8601String() + "now");
+          print(readed_time);
+
+          var how_much_time_passed = now.difference(readed_time);
+          var twenty_four_hour = const Duration(hours: 24);
+          var remaining_time = twenty_four_hour - how_much_time_passed ;
+          print(remaining_time);
+          String sDuration = "${remaining_time.inHours}:${remaining_time.inMinutes.remainder(60)}:${(remaining_time.inSeconds.remainder(60))}";
+          timeTextHolder = sDuration;
 
           // Write time to
           if(controller.value.position >=

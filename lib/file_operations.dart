@@ -34,4 +34,19 @@ class CounterStorage {
     // Write the file
     return file.writeAsString('$time');
   }
+
+  String getRemainigTime(DateTime readedTime) {
+
+    var now = DateTime.now();
+    var howMuchTimePassed = now.difference(readedTime);
+    var twentyFourHour = const Duration(hours: 24);
+    var remainingTime = twentyFourHour - howMuchTimePassed ;
+
+    String sDuration = "0:0:0";
+    if (remainingTime > const Duration(seconds: 0)) {
+      sDuration = "${remainingTime.inHours}:${remainingTime.inMinutes.remainder(60)}:${(remainingTime.inSeconds.remainder(60))}";
+    }
+    return sDuration;
+  }
+
 }
