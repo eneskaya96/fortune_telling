@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:fortune_telling/home_page.dart';
 import 'package:universal_io/io.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -24,27 +25,14 @@ class ResultPage extends StatefulWidget {
 
 class _ResultPageState extends State<ResultPage> {
 
-  late VideoPlayerController controller;
   late Timer timer;
 
   late BannerAd _ad;
   bool isLoaded = false;
 
-  String fortune = "";
-  String textHolder = "";
   String timeTextHolder = "XXX";
   late DateTime readed_time ;
 
-
-  loadVideoPlayer(){
-    controller = VideoPlayerController.asset('images/newnew.mp4');
-    controller.addListener(() {
-      setState(() {});
-    });
-    controller.initialize().then((value){
-      setState(() {});
-    });
-  }
 
 
   @override
@@ -54,34 +42,22 @@ class _ResultPageState extends State<ResultPage> {
         readed_time = DateTime.parse(value);
       });
     });
-    loadVideoPlayer();
+
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
         setState(() {
-          //textHolder = DateTime.now().toIso8601String();
-          var now = DateTime.now();
-          print(now.toIso8601String() + "now");
-          print(readed_time);
 
-          var how_much_time_passed = now.difference(readed_time);
-          var twenty_four_hour = const Duration(hours: 24);
-          var remaining_time = twenty_four_hour - how_much_time_passed ;
-          print(remaining_time);
-          String sDuration = "${remaining_time.inHours}:${remaining_time.inMinutes.remainder(60)}:${(remaining_time.inSeconds.remainder(60))}";
-          timeTextHolder = sDuration;
+          String remaining_time = widget.storage.getRemainigTime(readed_time);
+          timeTextHolder = remaining_time;
+          if (remaining_time == "0:0:0") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context)
+              =>  MyHomePage(title: "HOME",
+                  storage: widget.storage)),
+            );
+            timer.cancel();
+          }
 
-          // Write time to
-          if(controller.value.position >=
-              controller.value.duration - const Duration(seconds: 9) &&
-              controller.value.position <
-                controller.value.duration - const Duration(seconds: 2)) {
-            print('video almost Ended');
-            textHolder = fortune;
-          }
-          else if(controller.value.position >=
-              controller.value.duration - const Duration(seconds: 2) ) {
-            print('video Ended');
-            textHolder = '';
-          }
         }));
     // Admod initialized if mobile
     if (Platform.isAndroid || Platform.isIOS) {
@@ -137,16 +113,6 @@ class _ResultPageState extends State<ResultPage> {
     else { return CircularProgressIndicator(); }
   }
 
-  Future<void> get_fortune() async {
-    String response = await get_fortune_();
-    if (response.isNotEmpty) {
-      setState(() {
-        dynamic jj = jsonDecode(response);
-        fortune = jj['data']['fortune'];
-      });
-    } else { print("RESPONSE can not obtained "); }
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -162,30 +128,6 @@ class _ResultPageState extends State<ResultPage> {
               child:
                 Stack(
                   children: [
-                    GestureDetector(
-                        onTap: () {
-                          get_fortune();
-                          DateTime time = DateTime.now();
-                          widget.storage.writeTime(time.toIso8601String());
-                          readed_time = time;
-                          controller.play();
-                        }, // Image tapped
-                        child: SizedBox(
-                          child: VideoPlayer(controller),
-                        ),
-                    ),
-                    Container(
-                        alignment: Alignment.center,
-                        child: Text(
-                          textHolder,
-                          style: GoogleFonts.montserrat(
-                            textStyle: Theme.of(context).textTheme.headline4,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: const Color.fromRGBO(255, 255, 255, 0.7),
-                          ),
-                        )
-                    ),
                     Container(
                         alignment: Alignment.topCenter,
                         child: Text(

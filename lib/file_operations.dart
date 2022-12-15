@@ -39,7 +39,7 @@ class CounterStorage {
 
     var now = DateTime.now();
     var howMuchTimePassed = now.difference(readedTime);
-    var twentyFourHour = const Duration(hours: 24);
+    var twentyFourHour = const Duration(minutes: 2);
     var remainingTime = twentyFourHour - howMuchTimePassed ;
 
     String sDuration = "0:0:0";

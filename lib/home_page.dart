@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:fortune_telling/result_page.dart';
 import 'package:universal_io/io.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -72,6 +73,13 @@ class _MyHomePageState extends State<MyHomePage> {
               controller.value.duration - const Duration(seconds: 2) ) {
             print('video Ended');
             textHolder = '';
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context)
+              =>  ResultPage(title: "Result Page",
+                  storage: widget.storage)),
+            );
+            timer.cancel();
           }
         }));
     // Admod initialized if mobile

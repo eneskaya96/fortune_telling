@@ -54,14 +54,13 @@ class _TransitionPageState extends State<TransitionPage> {
           // video ended
           if(controller.value.position == controller.value.duration) {
             String remaining_time = widget.storage.getRemainigTime(readed_time);
-            if (remaining_time != "0:0:0") {
+            if (remaining_time == "0:0:0") {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context)
-                =>  MyHomePage(title: "TT",
+                =>  MyHomePage(title: "HOME",
                     storage: widget.storage)),
               );
-              timer.cancel();
             }
             else {
               Navigator.push(
@@ -70,8 +69,8 @@ class _TransitionPageState extends State<TransitionPage> {
                 =>  ResultPage(title: "RESULT",
                     storage: widget.storage)),
               );
-              timer.cancel();
             }
+            timer.cancel();
 
           }
         }));
