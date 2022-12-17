@@ -150,6 +150,7 @@ class _ResultPageState extends State<ResultPage> {
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Colors.pink,
+        automaticallyImplyLeading: false
       ),
       body: Center(
         child: Column(
