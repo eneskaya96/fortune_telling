@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:video_player/video_player.dart';
 import 'file_operations.dart';
-import 'ad_helper.dart';
 import 'home_page.dart';
 
 class TransitionPage extends StatefulWidget {
@@ -28,17 +27,10 @@ class _TransitionPageState extends State<TransitionPage> {
   late BannerAd _ad;
   bool isLoaded = false;
   var readed_time;
+  late String token;
 
-  loadVideoPlayer(){
-    controller = VideoPlayerController.asset('images/transit.mp4');
-    controller.addListener(() {
-      setState(() {});
-    });
-    controller.initialize().then((value){
-      setState(() {
-        controller.play();
-      });
-    });
+  getToken() async {
+    token = (await FirebaseMessaging.instance.getToken())!;
   }
 
   @override
@@ -48,63 +40,49 @@ class _TransitionPageState extends State<TransitionPage> {
         readed_time = DateTime.parse(value);
       });
     });
-    loadVideoPlayer();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
         setState(() {
-          // video ended
-          if(controller.value.position == controller.value.duration) {
-            String remaining_time = widget.storage.getRemainigTime(readed_time);
-            if (remaining_time == "0:0:0") {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context)
-                =>  MyHomePage(title: "HOME",
-                    storage: widget.storage)),
-              );
-            }
-            else {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context)
-                =>  ResultPage(title: "RESULT",
-                    storage: widget.storage)),
-              );
-            }
-            timer.cancel();
-
-          }
+          _timer_job();
         }));
 
-    // Admod initialized if mobile
-    if (Platform.isAndroid || Platform.isIOS) {
-      WidgetsFlutterBinding.ensureInitialized();
-      MobileAds.instance.initialize();
-    }
-    super.initState();
+    loadVideoPlayer();
+  }
 
-    if (AdHelper.bannerAdUnitId != "UnsupportedPlatform"){
-      _ad = BannerAd(
-        size: AdSize.banner,
-        adUnitId: AdHelper.bannerAdUnitId,
-        request: AdRequest(),
-        listener: BannerAdListener(
-            onAdLoaded: (_) {
-              setState(() {
-                isLoaded = true;
-              });
-            },
-            onAdFailedToLoad: (_, error) {
-              print("Ad failed to load error $error");
-            }
-        ),
-      );
-      _ad.load();
+  void _timer_job(){
+    // video ended
+    if(controller.value.position == controller.value.duration) {
+      String remaining_time = widget.storage.getRemainigTime(readed_time);
+      if (remaining_time == "0:0:0") {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context)
+          =>  MyHomePage(title: "HOME",
+              storage: widget.storage)),
+        );
+      }
+      else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context)
+          =>  ResultPage(title: "RESULT",
+              storage: widget.storage)),
+        );
+      }
+      timer.cancel();
+
     }
   }
 
-  late String token;
-  getToken() async {
-    token = (await FirebaseMessaging.instance.getToken())!;
+  void loadVideoPlayer(){
+    controller = VideoPlayerController.asset('images/transit.mp4');
+    controller.addListener(() {
+      setState(() {});
+    });
+    controller.initialize().then((value){
+      setState(() {
+        controller.play();
+      });
+    });
   }
 
   @override
@@ -125,11 +103,7 @@ class _TransitionPageState extends State<TransitionPage> {
               child:
                 Stack(
                   children: [
-                    GestureDetector(
-                        onTap: () {
-                          print("tapp");
-
-                        }, // Image tapped
+                    GestureDetector( // Image tapped
                         child: SizedBox(
                           child: VideoPlayer(controller),
                         ),

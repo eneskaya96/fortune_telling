@@ -35,9 +35,65 @@ class _MyHomePageState extends State<MyHomePage> {
   String textHolder = "";
   String timeTextHolder = "XXX";
   late DateTime readed_time ;
+  late String token;
+
+  getToken() async {
+    token = (await FirebaseMessaging.instance.getToken())!;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    widget.storage.readTime().then((value) {
+      setState(() {
+        readed_time = DateTime.parse(value);
+      });
+    });
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
+        setState(() {
+          _timer_job();
+        }));
+
+    _loadBanner();
+    _loadVideoPlayer();
+  }
+
+  void _timer_job() {
+    timeTextHolder = widget.storage.getRemainigTime(readed_time);
+
+    // Write time to
+    if(controller.value.position >=
+        controller.value.duration - const Duration(seconds: 9) &&
+        controller.value.position <
+            controller.value.duration - const Duration(seconds: 2)) {
+      print('video almost Ended');
+      textHolder = fortune;
+    }
+    else if(controller.value.position >=
+        controller.value.duration - const Duration(seconds: 2) ) {
+      print('video Ended');
+      textHolder = '';
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context)
+        =>  ResultPage(title: "Result Page",
+            storage: widget.storage)),
+      );
+      timer.cancel();
+    }
+  }
 
 
-  loadVideoPlayer(){
+  @override
+  void dispose() {
+    if (Platform.isAndroid || Platform.isIOS) {
+      _ad.dispose();
+    }
+    super.dispose();
+  }
+
+  _loadVideoPlayer(){
     controller = VideoPlayerController.asset('images/newnew.mp4');
     controller.addListener(() {
       setState(() {});
@@ -46,48 +102,12 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {});
     });
   }
-
-
-  @override
-  void initState() {
-    widget.storage.readTime().then((value) {
-      setState(() {
-        readed_time = DateTime.parse(value);
-      });
-    });
-    loadVideoPlayer();
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
-        setState(() {
-          //textHolder = DateTime.now().toIso8601String();
-          timeTextHolder = widget.storage.getRemainigTime(readed_time);
-
-          // Write time to
-          if(controller.value.position >=
-              controller.value.duration - const Duration(seconds: 9) &&
-              controller.value.position <
-                controller.value.duration - const Duration(seconds: 2)) {
-            print('video almost Ended');
-            textHolder = fortune;
-          }
-          else if(controller.value.position >=
-              controller.value.duration - const Duration(seconds: 2) ) {
-            print('video Ended');
-            textHolder = '';
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context)
-              =>  ResultPage(title: "Result Page",
-                  storage: widget.storage)),
-            );
-            timer.cancel();
-          }
-        }));
+  void _loadBanner() {
     // Admod initialized if mobile
     if (Platform.isAndroid || Platform.isIOS) {
       WidgetsFlutterBinding.ensureInitialized();
       MobileAds.instance.initialize();
     }
-    super.initState();
 
     if (AdHelper.bannerAdUnitId != "UnsupportedPlatform"){
       _ad = BannerAd(
@@ -107,19 +127,6 @@ class _MyHomePageState extends State<MyHomePage> {
       );
       _ad.load();
     }
-  }
-
-  late String token;
-  getToken() async {
-    token = (await FirebaseMessaging.instance.getToken())!;
-  }
-
-  @override
-  void dispose() {
-    if (Platform.isAndroid || Platform.isIOS) {
-      _ad.dispose();
-    }
-    super.dispose();
   }
 
   Widget checkForAd() {

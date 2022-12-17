@@ -2,6 +2,8 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 class CounterStorage {
+  static const int  come_back_after_hour = 5;
+
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
 
@@ -39,7 +41,7 @@ class CounterStorage {
 
     var now = DateTime.now();
     var howMuchTimePassed = now.difference(readedTime);
-    var twentyFourHour = const Duration(minutes: 2);
+    var twentyFourHour = const Duration(minutes: come_back_after_hour);
     var remainingTime = twentyFourHour - howMuchTimePassed ;
 
     String sDuration = "0:0:0";
