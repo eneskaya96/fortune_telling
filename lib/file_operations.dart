@@ -20,11 +20,17 @@ class CounterStorage {
       final file = await _localFile;
       // Read the file
       final contents = await file.readAsString();
-
+      if (contents.isEmpty){
+        DateTime time = DateTime.now();
+        time = time.add(const Duration(minutes: - come_back_after_hour - 10));
+        writeTime(time.toIso8601String());
+        return time.toIso8601String();
+      }
       return contents;
     } catch (e) {
       // If encountering an error, return 0
       DateTime time = DateTime.now();
+      time = time.add(const Duration(minutes: - come_back_after_hour - 10));
       writeTime(time.toIso8601String());
       return time.toIso8601String();
     }

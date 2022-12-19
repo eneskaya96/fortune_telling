@@ -31,6 +31,8 @@ class _MyHomePageState extends State<MyHomePage> {
   late BannerAd _ad;
   bool isLoaded = false;
 
+  bool tappable = true;
+
   String fortune = "";
   String textHolder = "";
   String timeTextHolder = "XXX";
@@ -171,11 +173,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     GestureDetector(
                         onTap: () {
-                          get_fortune();
-                          DateTime time = DateTime.now();
-                          widget.storage.writeTime(time.toIso8601String());
-                          readed_time = time;
-                          controller.play();
+                          if (tappable) {
+                            tappable = false;
+
+                            get_fortune();
+                            DateTime time = DateTime.now();
+                            widget.storage.writeTime(time.toIso8601String());
+                            readed_time = time;
+                            controller.play();
+                          }
+
                         }, // Image tapped
                         child: SizedBox(
                           child: VideoPlayer(controller),
