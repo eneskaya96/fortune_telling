@@ -40,7 +40,8 @@ class _MyHomePageState extends State<MyHomePage> {
   late String token;
 
   final List<String> entries = <String>['A', 'B', 'C'];
-  final List<int> colorCodes = <int>[600, 500, 100];
+  final List<Color> colorCodes = <Color>[Colors.black, Colors.blue, Colors.green, Colors.red, Colors.pink,
+    Colors.black, Colors.blue, Colors.green, Colors.red, Colors.pink];
 
 
   getToken() async {
@@ -173,86 +174,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget fortunes_dates(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(8),
-      itemCount: entries.length,
-      itemBuilder: (BuildContext context, int index) {
-        return Container(
-          height: 50,
-          color: Colors.amber[colorCodes[index]],
-          child: Center(child: Text('Entry ${entries[index]}')),
-        );
-      },
-      separatorBuilder: (BuildContext context, int index) => const Divider(),
-    );
-  }
-
-  Widget ff(BuildContext context) {
     return Wrap(
-      alignment: WrapAlignment.spaceAround,
       children: [
-        Container(
-          width: 50.0,
-          height: 50.0,
-          color: Colors.green,
-        ),
-        SizedBox(width: 20), // TODO: make orantılı
-        Container(
-          width: 50.0,
-          height: 50.0,
-          color: Colors.red,
-        ),
-        SizedBox(width: 20), // TODO: make orantılı
-        Container(
-          width: 50.0,
-          height: 50.0,
-          color: Colors.blue,
-        ),
-        SizedBox(width: 20), // TODO: make orantılı
-        Container(
-          width: 50.0,
-          height: 50.0,
-          color: Colors.green,
-        ),
-        SizedBox(width: 20), // TODO: make orantılı
-        Container(
-          width: 50.0,
-          height: 50.0,
-          color: Colors.pink,
-        ),
-        SizedBox(width: 20), // TODO: make orantılı
-        Container(
-          width: 50.0,
-          height: 50.0,
-          color: Colors.green,
-        ),
-        SizedBox(width: 20), // TODO: make orantılı
-        Container(
-          width: 50.0,
-          height: 50.0,
-          color: Colors.red,
-        ),
-        SizedBox(width: 20), // TODO: make orantılı
-        Container(
-          width: 50.0,
-          height: 50.0,
-          color: Colors.blue,
-        ),
-        SizedBox(width: 20), // TODO: make orantılı
-        Container(
-          width: 50.0,
-          height: 50.0,
-          color: Colors.green,
-        ),
-        SizedBox(width: 20), // TODO: make orantılı
-        Container(
-          width: 50.0,
-          height: 50.0,
-          color: Colors.pink,
-        )
+        for (var item in colorCodes)
+          Wrap(
+            children: [
+              Container(
+                width: 60.0,
+                height: 60.0,
+                color: item,
+              ),
+              SizedBox(width: 20),
+            ],
+          )
       ],
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -329,58 +267,16 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 child: Column(
                                   children: [
-                                    Text("ENES"),
-                                    Text("ENES2"),
                                     SingleChildScrollView(
-                                      padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+                                      reverse: true,
+                                      padding: EdgeInsets.fromLTRB(20.0, 20.0, 10.0, 10.0),
                                       scrollDirection: Axis.horizontal,
-                                      child: ff(context),
+                                      child: fortunes_dates(context),
                                     ),
-                                    Text("ENES3"),
                                   ],
                                 )
                               ),
                             )
-                              /*
-                              Column(
-                                children: [
-                                  ListView(
-                                    // This next line does the trick.
-                                    controller: scrollController,
-                                    scrollDirection: Axis.horizontal,
-                                    children: <Widget>[
-                                      Container(
-                                        width: 160.0,
-                                        height: 160.0,
-                                        color: Colors.red,
-                                      ),
-                                      Container(
-                                        width: 160.0,
-                                        height: 160.0,
-                                        color: Colors.blue,
-                                      ),
-                                      Container(
-                                        width: 160.0,
-                                        height: 160.0,
-                                        color: Colors.green,
-                                      ),
-                                      Container(
-                                        width: 160.0,
-                                        height: 160.0,
-                                        color: Colors.yellow,
-                                      ),
-                                      Container(
-                                        width: 160.0,
-                                        height: 160.0,
-                                        color: Colors.orange,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-
-                               */
-
                       );
                   },
                 ),
