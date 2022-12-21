@@ -39,6 +39,9 @@ class _MyHomePageState extends State<MyHomePage> {
   late DateTime readed_time ;
   late String token;
 
+  final List<String> entries = <String>['A', 'B', 'C'];
+  final List<int> colorCodes = <int>[600, 500, 100];
+
 
   getToken() async {
     token = (await FirebaseMessaging.instance.getToken())!;
@@ -151,7 +154,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   const Spacer(),
                 ],
-              )
+              ),
+              SizedBox(height: 20), // TODO: make orantılı
             ]
         );
     }
@@ -168,6 +172,87 @@ class _MyHomePageState extends State<MyHomePage> {
     } else { print("RESPONSE can not obtained "); }
   }
 
+  Widget fortunes_dates(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.all(8),
+      itemCount: entries.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Container(
+          height: 50,
+          color: Colors.amber[colorCodes[index]],
+          child: Center(child: Text('Entry ${entries[index]}')),
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) => const Divider(),
+    );
+  }
+
+  Widget ff(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.spaceAround,
+      children: [
+        Container(
+          width: 50.0,
+          height: 50.0,
+          color: Colors.green,
+        ),
+        SizedBox(width: 20), // TODO: make orantılı
+        Container(
+          width: 50.0,
+          height: 50.0,
+          color: Colors.red,
+        ),
+        SizedBox(width: 20), // TODO: make orantılı
+        Container(
+          width: 50.0,
+          height: 50.0,
+          color: Colors.blue,
+        ),
+        SizedBox(width: 20), // TODO: make orantılı
+        Container(
+          width: 50.0,
+          height: 50.0,
+          color: Colors.green,
+        ),
+        SizedBox(width: 20), // TODO: make orantılı
+        Container(
+          width: 50.0,
+          height: 50.0,
+          color: Colors.pink,
+        ),
+        SizedBox(width: 20), // TODO: make orantılı
+        Container(
+          width: 50.0,
+          height: 50.0,
+          color: Colors.green,
+        ),
+        SizedBox(width: 20), // TODO: make orantılı
+        Container(
+          width: 50.0,
+          height: 50.0,
+          color: Colors.red,
+        ),
+        SizedBox(width: 20), // TODO: make orantılı
+        Container(
+          width: 50.0,
+          height: 50.0,
+          color: Colors.blue,
+        ),
+        SizedBox(width: 20), // TODO: make orantılı
+        Container(
+          width: 50.0,
+          height: 50.0,
+          color: Colors.green,
+        ),
+        SizedBox(width: 20), // TODO: make orantılı
+        Container(
+          width: 50.0,
+          height: 50.0,
+          color: Colors.pink,
+        )
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +327,18 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: SingleChildScrollView(
                             controller: scrollController,
                               child: Container(
-                                child: Text("ENES"),
+                                child: Column(
+                                  children: [
+                                    Text("ENES"),
+                                    Text("ENES2"),
+                                    SingleChildScrollView(
+                                      padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+                                      scrollDirection: Axis.horizontal,
+                                      child: ff(context),
+                                    ),
+                                    Text("ENES3"),
+                                  ],
+                                )
                               ),
                             )
                               /*
