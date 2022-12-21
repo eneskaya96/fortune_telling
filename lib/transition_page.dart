@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fortune_telling/result_page.dart';
+import 'package:fortune_telling/tutorial_page_1.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ class _TransitionPageState extends State<TransitionPage> {
   bool isLoaded = false;
   var readed_time;
   late String token;
+  bool isFirstTime = false;
 
   getToken() async {
     token = (await FirebaseMessaging.instance.getToken())!;
@@ -40,6 +42,13 @@ class _TransitionPageState extends State<TransitionPage> {
         readed_time = DateTime.parse(value);
       });
     });
+
+    widget.storage.readIsFirstTime().then((value) {
+      setState(() {
+        isFirstTime = value.toLowerCase() == 'true';
+      });
+    });
+
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
         setState(() {
           _timer_job();
@@ -51,8 +60,20 @@ class _TransitionPageState extends State<TransitionPage> {
   void _timer_job(){
     // video ended
     if(controller.value.position == controller.value.duration) {
+
       String remaining_time = widget.storage.getRemainigTime(readed_time);
-      if (remaining_time == "0:0:0") {
+
+      // open tutorial page
+      print(isFirstTime);
+      if (isFirstTime){
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context)
+          =>  TutorialPage1(title: "Tutorial 1",
+                            storage: widget.storage,)),
+        );
+      }
+      else if (remaining_time == "0:0:0") {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context)
