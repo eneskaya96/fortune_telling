@@ -148,8 +148,15 @@ class _ResultPageState extends State<ResultPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Colors.pink,
+        title: Text(widget.title,
+          style: GoogleFonts.montserrat(
+            textStyle: Theme.of(context).textTheme.headline4,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: const Color.fromRGBO(0, 0, 0, 0.7),
+          ),
+        ),
+        backgroundColor: Colors.yellowAccent,
         automaticallyImplyLeading: false
       ),
       body: Center(
@@ -184,6 +191,7 @@ class _ResultPageState extends State<ResultPage> {
 
   Widget _buildFloatingActionButton() {
     return ( _rewardedAd != null) ? FloatingActionButton.extended(
+      backgroundColor: Colors.yellowAccent,
       onPressed: () {
         _rewardedAd?.show(
           onUserEarnedReward: (_, reward) {
@@ -198,7 +206,14 @@ class _ResultPageState extends State<ResultPage> {
           },
         );
       },
-      label: const Text('Get One More Chance'),
+      label: Text('Get One More Chance',
+                  style: GoogleFonts.montserrat(
+                    textStyle: Theme.of(context).textTheme.headline4,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: const Color.fromRGBO(0, 0, 0, 0.7),
+                  ),
+      ),
     )
     : const CircularProgressIndicator();
   }

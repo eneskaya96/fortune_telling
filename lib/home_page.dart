@@ -39,6 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late DateTime readed_time ;
   late String token;
 
+
   getToken() async {
     token = (await FirebaseMessaging.instance.getToken())!;
   }
@@ -133,14 +134,26 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget checkForAd() {
     if (isLoaded = true &  Platform.isAndroid || Platform.isIOS ) {
-      return Container(
-        width: _ad.size.width.toDouble(),
-        height: _ad.size.height.toDouble(),
-        alignment: Alignment.center,
-        child: AdWidget(
-          ad: _ad,
-        ),
-      );
+      return
+        Column(
+            children: [
+              const Spacer(),
+              Row(
+                children: [
+                  const Spacer(),
+                  Container(
+                    width: _ad.size.width.toDouble(),
+                    height: _ad.size.height.toDouble(),
+                    alignment: Alignment.topCenter,
+                    child: AdWidget(
+                      ad: _ad,
+                    ),
+                  ),
+                  const Spacer(),
+                ],
+              )
+            ]
+        );
     }
     else { return CircularProgressIndicator(); }
   }
@@ -160,64 +173,124 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Colors.pink,
+        title: Text(widget.title,
+          style: GoogleFonts.montserrat(
+            textStyle: Theme.of(context).textTheme.headline4,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: const Color.fromRGBO(0, 0, 0, 0.7),
+          ),
+        ),
+        backgroundColor: Colors.yellowAccent,
         automaticallyImplyLeading: false
       ),
       body: Center(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child:
-                Stack(
-                  children: [
-                    GestureDetector(
-                        onTap: () {
-                          if (tappable) {
-                            tappable = false;
+        child:
+          Stack(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (tappable) {
+                      tappable = false;
 
-                            get_fortune();
-                            DateTime time = DateTime.now();
-                            widget.storage.writeTime(time.toIso8601String());
-                            readed_time = time;
-                            controller.play();
-                          }
+                      get_fortune();
+                      DateTime time = DateTime.now();
+                      widget.storage.writeTime(time.toIso8601String());
+                      readed_time = time;
+                      controller.play();
+                    }
 
-                        }, // Image tapped
-                        child: SizedBox(
-                          child: VideoPlayer(controller),
-                        ),
-                    ),
-                    Container(
-                        alignment: Alignment.center,
-                        child: Text(
-                          textHolder,
-                          style: GoogleFonts.montserrat(
-                            textStyle: Theme.of(context).textTheme.headline4,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: const Color.fromRGBO(255, 255, 255, 0.7),
-                          ),
-                        )
-                    ),
-                    Container(
-                        alignment: Alignment.topCenter,
-                        child: Text(
-                          timeTextHolder,
-                          style: GoogleFonts.montserrat(
-                            textStyle: Theme.of(context).textTheme.headline4,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: const Color.fromRGBO(0, 0, 0, 0.7),
-                          ),
-                        )
-                    ),
-                  ]
+                  }, // Image tapped
+                  child: SizedBox(
+                    child: VideoPlayer(controller),
+                  ),
                 ),
-            ),
-            checkForAd(),
-          ],
-        )
+                Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      textHolder,
+                      style: GoogleFonts.montserrat(
+                        textStyle: Theme.of(context).textTheme.headline4,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        color: const Color.fromRGBO(255, 255, 255, 0.7),
+                      ),
+                    )
+                ),
+                Container(
+                    alignment: Alignment.topCenter,
+                    child: Text(
+                      timeTextHolder,
+                      style: GoogleFonts.montserrat(
+                        textStyle: Theme.of(context).textTheme.headline4,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        color: const Color.fromRGBO(0, 0, 0, 0.7),
+                      ),
+                    )
+                ),
+                DraggableScrollableSheet(
+                  initialChildSize: 0.25,
+                  maxChildSize: 0.85,
+                  minChildSize: 0.25,
+                  builder: (BuildContext context, ScrollController scrollController) {
+                    return
+                      DecoratedBox(
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(image: AssetImage("images/yball.png"), fit: BoxFit.cover),
+                        ),
+                        child: SingleChildScrollView(
+                            controller: scrollController,
+                              child: Container(
+                                child: Text("ENES"),
+                              ),
+                            )
+                              /*
+                              Column(
+                                children: [
+                                  ListView(
+                                    // This next line does the trick.
+                                    controller: scrollController,
+                                    scrollDirection: Axis.horizontal,
+                                    children: <Widget>[
+                                      Container(
+                                        width: 160.0,
+                                        height: 160.0,
+                                        color: Colors.red,
+                                      ),
+                                      Container(
+                                        width: 160.0,
+                                        height: 160.0,
+                                        color: Colors.blue,
+                                      ),
+                                      Container(
+                                        width: 160.0,
+                                        height: 160.0,
+                                        color: Colors.green,
+                                      ),
+                                      Container(
+                                        width: 160.0,
+                                        height: 160.0,
+                                        color: Colors.yellow,
+                                      ),
+                                      Container(
+                                        width: 160.0,
+                                        height: 160.0,
+                                        color: Colors.orange,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+
+                               */
+
+                      );
+                  },
+                ),
+                checkForAd(),
+              ]
+          )
       ),
     );
   }

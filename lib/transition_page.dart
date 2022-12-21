@@ -74,7 +74,7 @@ class _TransitionPageState extends State<TransitionPage> {
   }
 
   void loadVideoPlayer(){
-    controller = VideoPlayerController.asset('images/transit.mp4');
+    controller = VideoPlayerController.asset('images/transition.mp4');
     controller.setVolume(0.0);
     controller.addListener(() {
       setState(() {});
