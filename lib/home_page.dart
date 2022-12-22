@@ -353,14 +353,24 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: (BuildContext context, ScrollController scrollController) {
                         return
                           DecoratedBox(
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(image: AssetImage("images/yball.png"), fit: BoxFit.cover),
+                              decoration:  BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                image: const DecorationImage(
+                                    image: AssetImage("images/calender.png"),
+                                    fit: BoxFit.cover
+                                    ),
                               ),
                               child: SingleChildScrollView(
                                 controller: scrollController,
                                 child: Container(
                                     child: Column(
                                       children: [
+                                        SizedBox(height: 10,),
+                                        Container(
+                                          width: 130,
+                                          height: 5,
+                                          color: Colors.grey[200],
+                                        ),
                                         SingleChildScrollView(
                                           reverse: true,
                                           padding: EdgeInsets.fromLTRB(20.0, 20.0, 10.0, 10.0),
