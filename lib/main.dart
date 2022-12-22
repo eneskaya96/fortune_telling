@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
       title: 'Fortune Teller',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: const Color.fromRGBO(249, 249, 250, 0.1),
       ),
       home: TransitionPage(title: "TODAY's MOTTO", storage: CounterStorage()),
     );

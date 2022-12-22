@@ -289,18 +289,6 @@ class _MyHomePageState extends State<MyHomePage> {
     return WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
-          appBar: AppBar(
-              title: Text(widget.title,
-                style: GoogleFonts.montserrat(
-                  textStyle: Theme.of(context).textTheme.headline4,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: const Color.fromRGBO(0, 0, 0, 0.7),
-                ),
-              ),
-              backgroundColor: Colors.yellowAccent,
-              automaticallyImplyLeading: false
-          ),
           body: Center(
               child:
               Stack(
