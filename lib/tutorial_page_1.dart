@@ -33,53 +33,59 @@ class _TutorialPage1State extends State<TutorialPage1> {
     print("Timer");
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              child: FittedBox(
-                  child: Image.asset('images/tutorial_page_1.jpg'),
-                fit: BoxFit.fill,
-              )
-          ),
-          Column(
-            children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 14 / 23,
-              ),
-              Row(
-                children: [
-                  const Spacer(),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.width * 4 / 10,
-                    width: MediaQuery.of(context).size.width * 4 / 10,
-                    child: TextButton(
-                      child: const Text('', style: TextStyle(fontSize: 20.0),),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context)
-                          =>  TutorialPage2(title: "Tutorial 2",
-                            storage: widget.storage,)),
-                        );
-                      },
-                    ),
-                  )
-                ],
-              )
-            ],
-          )
-
-        ],
-      )
-
-    );
+  Future<bool> _onWillPop() async {
+    return false; //<-- SEE HERE
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+        onWillPop: _onWillPop,
+        child: Scaffold(
+            body: Stack(
+              children: [
+                Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    child: FittedBox(
+                      child: Image.asset('images/tutorial_page_1.jpg'),
+                      fit: BoxFit.fill,
+                    )
+                ),
+                Column(
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 14 / 23,
+                    ),
+                    Row(
+                      children: [
+                        const Spacer(),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.width * 4 / 10,
+                          width: MediaQuery.of(context).size.width * 4 / 10,
+                          child: TextButton(
+                            child: const Text('', style: TextStyle(fontSize: 20.0),),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context)
+                                =>  TutorialPage2(title: "Tutorial 2",
+                                  storage: widget.storage,)),
+                              );
+                            },
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                )
+
+              ],
+            )
+
+        ),
+    );
+  }
 }
 
 

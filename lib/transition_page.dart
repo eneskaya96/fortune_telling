@@ -115,28 +115,36 @@ class _TransitionPageState extends State<TransitionPage> {
     super.dispose();
   }
 
+  Future<bool> _onWillPop() async {
+    return false; //<-- SEE HERE
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child:
-                Stack(
-                  children: [
-                    GestureDetector( // Image tapped
-                        child: SizedBox(
-                          child: VideoPlayer(controller),
-                        ),
-                    )
-                  ]
-                ),
-            ),
-          ],
-        )
-      ),
-    );
+    return
+      WillPopScope(
+        onWillPop: _onWillPop,
+        child:Scaffold(
+          body: Center(
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child:
+                    Stack(
+                        children: [
+                          GestureDetector( // Image tapped
+                            child: SizedBox(
+                              child: VideoPlayer(controller),
+                            ),
+                          )
+                        ]
+                    ),
+                  ),
+                ],
+              )
+          ),
+        ) ,
+      );
   }
 }
 

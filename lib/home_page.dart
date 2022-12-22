@@ -191,100 +191,107 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Future<bool> _onWillPop() async {
+    return false; //<-- SEE HERE
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title,
-          style: GoogleFonts.montserrat(
-            textStyle: Theme.of(context).textTheme.headline4,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: const Color.fromRGBO(0, 0, 0, 0.7),
+    return WillPopScope(
+        onWillPop: _onWillPop,
+        child: Scaffold(
+          appBar: AppBar(
+              title: Text(widget.title,
+                style: GoogleFonts.montserrat(
+                  textStyle: Theme.of(context).textTheme.headline4,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: const Color.fromRGBO(0, 0, 0, 0.7),
+                ),
+              ),
+              backgroundColor: Colors.yellowAccent,
+              automaticallyImplyLeading: false
+          ),
+          body: Center(
+              child:
+              Stack(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        if (tappable) {
+                          tappable = false;
+
+                          get_fortune();
+                          DateTime time = DateTime.now();
+                          widget.storage.writeTime(time.toIso8601String());
+                          readed_time = time;
+                          controller.play();
+                        }
+
+                      }, // Image tapped
+                      child: SizedBox(
+                        child: VideoPlayer(controller),
+                      ),
+                    ),
+                    Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                          textHolder,
+                          style: GoogleFonts.montserrat(
+                            textStyle: Theme.of(context).textTheme.headline4,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: const Color.fromRGBO(255, 255, 255, 0.7),
+                          ),
+                        )
+                    ),
+                    Container(
+                        alignment: Alignment.topCenter,
+                        child: Text(
+                          timeTextHolder,
+                          style: GoogleFonts.montserrat(
+                            textStyle: Theme.of(context).textTheme.headline4,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: const Color.fromRGBO(0, 0, 0, 0.7),
+                          ),
+                        )
+                    ),
+                    DraggableScrollableSheet(
+                      initialChildSize: 0.25,
+                      maxChildSize: 0.85,
+                      minChildSize: 0.25,
+                      builder: (BuildContext context, ScrollController scrollController) {
+                        return
+                          DecoratedBox(
+                              decoration: const BoxDecoration(
+                                image: DecorationImage(image: AssetImage("images/yball.png"), fit: BoxFit.cover),
+                              ),
+                              child: SingleChildScrollView(
+                                controller: scrollController,
+                                child: Container(
+                                    child: Column(
+                                      children: [
+                                        SingleChildScrollView(
+                                          reverse: true,
+                                          padding: EdgeInsets.fromLTRB(20.0, 20.0, 10.0, 10.0),
+                                          scrollDirection: Axis.horizontal,
+                                          child: fortunes_dates(context),
+                                        ),
+                                      ],
+                                    )
+                                ),
+                              )
+                          );
+                      },
+                    ),
+                    checkForAd(),
+                  ]
+              )
           ),
         ),
-        backgroundColor: Colors.yellowAccent,
-        automaticallyImplyLeading: false
-      ),
-      body: Center(
-        child:
-          Stack(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (tappable) {
-                      tappable = false;
-
-                      get_fortune();
-                      DateTime time = DateTime.now();
-                      widget.storage.writeTime(time.toIso8601String());
-                      readed_time = time;
-                      controller.play();
-                    }
-
-                  }, // Image tapped
-                  child: SizedBox(
-                    child: VideoPlayer(controller),
-                  ),
-                ),
-                Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      textHolder,
-                      style: GoogleFonts.montserrat(
-                        textStyle: Theme.of(context).textTheme.headline4,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        color: const Color.fromRGBO(255, 255, 255, 0.7),
-                      ),
-                    )
-                ),
-                Container(
-                    alignment: Alignment.topCenter,
-                    child: Text(
-                      timeTextHolder,
-                      style: GoogleFonts.montserrat(
-                        textStyle: Theme.of(context).textTheme.headline4,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        color: const Color.fromRGBO(0, 0, 0, 0.7),
-                      ),
-                    )
-                ),
-                DraggableScrollableSheet(
-                  initialChildSize: 0.25,
-                  maxChildSize: 0.85,
-                  minChildSize: 0.25,
-                  builder: (BuildContext context, ScrollController scrollController) {
-                    return
-                      DecoratedBox(
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(image: AssetImage("images/yball.png"), fit: BoxFit.cover),
-                        ),
-                        child: SingleChildScrollView(
-                            controller: scrollController,
-                              child: Container(
-                                child: Column(
-                                  children: [
-                                    SingleChildScrollView(
-                                      reverse: true,
-                                      padding: EdgeInsets.fromLTRB(20.0, 20.0, 10.0, 10.0),
-                                      scrollDirection: Axis.horizontal,
-                                      child: fortunes_dates(context),
-                                    ),
-                                  ],
-                                )
-                              ),
-                            )
-                      );
-                  },
-                ),
-                checkForAd(),
-              ]
-          )
-      ),
     );
+
   }
 }
 
