@@ -42,7 +42,7 @@ class _TutorialPage3State extends State<TutorialPage3> {
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
               child: FittedBox(
-                  child: Image.asset('images/tutorial_page_2.jpg'),
+                  child: Image.asset('images/tutorial_page_3.jpg'),
                 fit: BoxFit.fill,
               )
           ),
