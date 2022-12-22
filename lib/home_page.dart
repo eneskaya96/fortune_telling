@@ -236,6 +236,7 @@ class _MyHomePageState extends State<MyHomePage> {
       fontSize: 10,
       fontWeight: FontWeight.w700,
       color: const Color.fromRGBO(0, 0, 0, 0.7),
+      backgroundColor: Colors.transparent
     );
   }
 
@@ -254,24 +255,37 @@ class _MyHomePageState extends State<MyHomePage> {
         for (var item in _dates)
           Wrap(
             children: [
-              FloatingActionButton(
-                heroTag: item.split("-")[2],
-                backgroundColor: Colors.grey[100],
-                onPressed: () {
-                  showFortunes(item);
-                },
-                child: Column(
-                  children: [
-                    Spacer(),
-                    Text(item.split("-")[2],
-                        style: myStyle()),
-                    Text(item.split("-")[1],
-                        style: myStyle()),
-                    Text(item.split("-")[0],
-                        style: myStyle()),
-                    Spacer(),
-                  ],
-                ),
+              Stack(
+                children: [
+                  Container(
+                    width: 50.0,
+                    height: 50.0,
+                    padding: EdgeInsets.zero,
+                    child: Image.asset(
+                      "images/elips_orange.png",
+                      fit: BoxFit.contain,
+                    )
+                  ),
+                  Positioned(
+                    width: 50,
+                    height: 50,
+                    child: GestureDetector(
+                      onTap: () {
+                        showFortunes(item);
+                      }, // Image tapped
+                      child: Column(
+                        children: [
+                          Spacer(),
+                          Text(item.split("-")[2],
+                              style: myStyle()),
+                          Text(item.split("-")[1],
+                              style: myStyle()),
+                          Spacer(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(width: 20),
             ],
