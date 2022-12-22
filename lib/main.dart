@@ -28,8 +28,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Fortune Teller',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: const Color.fromRGBO(249, 249, 250, 0.1),
+        scaffoldBackgroundColor: const Color.fromRGBO(
+            249, 249, 250, 1.0),
       ),
       home: TransitionPage(title: "TODAY's MOTTO", storage: CounterStorage()),
     );
