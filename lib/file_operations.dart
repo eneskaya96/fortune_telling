@@ -20,6 +20,11 @@ class CounterStorage {
     return File('$path/is_first_time.txt');
   }
 
+  Future<File> _localFileFortunesDate(String date) async{
+    final path = await _localPath;
+    return File('$path/$date.txt');
+  }
+
   Future<String> readTime() async {
     try {
       final file = await _localFileTime;
@@ -54,6 +59,28 @@ class CounterStorage {
       // If encountering an error
       return "true";
     }
+  }
+
+  Future<String> readFortunesForDate(String date) async {
+    try {
+      final file = await _localFileFortunesDate(date);
+      // Read the file
+      final contents = await file.readAsString();
+      if (contents.isEmpty){
+        return "X";
+      }
+      return contents;
+    } catch (e) {
+      // If encountering an error
+      return "X";
+    }
+  }
+
+  Future<File> writeFortuneForDate(String date, String fortune) async {
+    final file = await _localFileFortunesDate(date);
+
+    // Write the file
+    return file.writeAsString(fortune);
   }
 
   Future<File> writeIsFirstTime(String isFirstTime) async {

@@ -11,6 +11,7 @@ import 'package:video_player/video_player.dart';
 import 'file_operations.dart';
 import 'http_request.dart';
 import 'ad_helper.dart';
+import 'package:intl/intl.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title, required this.storage}) : super(key: key);
@@ -39,9 +40,9 @@ class _MyHomePageState extends State<MyHomePage> {
   late DateTime readed_time ;
   late String token;
 
-  final List<String> entries = <String>['A', 'B', 'C'];
-  final List<Color> colorCodes = <Color>[Colors.black, Colors.blue, Colors.green, Colors.red, Colors.pink,
-    Colors.black, Colors.blue, Colors.green, Colors.red, Colors.pink];
+  String fortunesHolder = "";
+
+  final List<String> dates = <String>['2022-Dec-19', '2022-Dec-20', '2022-Dec-21', '2022-Dec-22', '2022-Dec-23', '2022-Dec-24'];
 
 
   getToken() async {
@@ -51,6 +52,12 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+
+    // in the opening show current day fortune
+    DateTime now = DateTime.now();
+    var formatter = DateFormat('yyyy-MMM-dd');
+    String formattedDate = formatter.format(now);
+    showFortunes(formattedDate);
 
     widget.storage.readTime().then((value) {
       setState(() {
@@ -91,7 +98,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-
   @override
   void dispose() {
     if (Platform.isAndroid || Platform.isIOS) {
@@ -100,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  _loadVideoPlayer(){
+  void _loadVideoPlayer(){
     controller = VideoPlayerController.asset('images/newnew.mp4');
     controller.addListener(() {
       setState(() {});
@@ -169,20 +175,60 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         dynamic jj = jsonDecode(response);
         fortune = jj['data']['fortune'];
+
+        DateTime now = DateTime.now();
+        var formatter = DateFormat('yyyy-MMM-dd');
+        String formattedDate = formatter.format(now);
+        addFortuneForDate(formattedDate, fortune);
       });
     } else { print("RESPONSE can not obtained "); }
+  }
+
+  myStyle() {
+    return GoogleFonts.montserrat(
+      textStyle: Theme.of(context).textTheme.headline4,
+      fontSize: 10,
+      fontWeight: FontWeight.w700,
+      color: const Color.fromRGBO(0, 0, 0, 0.7),
+    );
+  }
+
+  void addFortuneForDate(String date, String fortune) {
+    widget.storage.writeFortuneForDate(date, fortune);
+  }
+
+  void showFortunes(String date){
+    widget.storage.readFortunesForDate(date).then((value) {
+      setState(() {
+        fortunesHolder = value;
+      });
+    });
   }
 
   Widget fortunes_dates(BuildContext context) {
     return Wrap(
       children: [
-        for (var item in colorCodes)
+        for (var item in dates)
           Wrap(
             children: [
-              Container(
-                width: 60.0,
-                height: 60.0,
-                color: item,
+              FloatingActionButton(
+                heroTag: item.split("-")[2],
+                backgroundColor: Colors.grey[100],
+                onPressed: () {
+                  showFortunes(item);
+                },
+                child: Column(
+                  children: [
+                    Spacer(),
+                    Text(item.split("-")[2],
+                        style: myStyle()),
+                    Text(item.split("-")[1],
+                        style: myStyle()),
+                    Text(item.split("-")[0],
+                        style: myStyle()),
+                    Spacer(),
+                  ],
+                ),
               ),
               SizedBox(width: 20),
             ],
@@ -278,6 +324,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                           scrollDirection: Axis.horizontal,
                                           child: fortunes_dates(context),
                                         ),
+                                        Text(fortunesHolder),
                                       ],
                                     )
                                 ),
@@ -291,7 +338,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
     );
-
   }
 }
 
