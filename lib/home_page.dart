@@ -42,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String fortunesHolder = "";
 
-  final List<String> dates = <String>['2022-Dec-19', '2022-Dec-20', '2022-Dec-21', '2022-Dec-22', '2022-Dec-23', '2022-Dec-24'];
+  final List<String> _dates = <String>['2022-Dec-19', '2022-Dec-20', '2022-Dec-21', '2022-Dec-22', '2022-Dec-23', '2022-Dec-24'];
 
 
   getToken() async {
@@ -52,6 +52,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+
+    readDates();
 
     // in the opening show current day fortune
     DateTime now = DateTime.now();
@@ -73,6 +75,40 @@ class _MyHomePageState extends State<MyHomePage> {
     _loadVideoPlayer();
   }
 
+  void readDates() {
+    widget.storage.readDates().then((value) {
+      setState(() {
+
+        DateTime now = DateTime.now();
+        DateTime twoDayAfterNow = now.add(const Duration(days: 3));
+        var formatter = DateFormat('yyyy-MMM-dd');
+
+        DateTime startDate;
+        // control initial date is empty case
+        if (value == ""){
+          startDate = now.add(const Duration(days: - 3));
+        }
+        else{
+          startDate = formatter.parse(value);
+          // if start date close to now date
+          if (startDate.compareTo(now.add(const Duration(days: - 3))) > 0){
+            startDate = now.add(const Duration(days: - 3));
+          }
+        }
+
+        // clear _dates list
+        _dates.clear();
+
+        while ( startDate.compareTo(twoDayAfterNow) < 0) {
+          String formattedDate = formatter.format(startDate);
+          _dates.add(formattedDate);
+
+          startDate = startDate.add(const Duration(days: 1));
+        }
+      });
+    });
+  }
+
   void _timer_job() {
     timeTextHolder = widget.storage.getRemainigTime(readed_time);
 
@@ -81,12 +117,10 @@ class _MyHomePageState extends State<MyHomePage> {
         controller.value.duration - const Duration(seconds: 9) &&
         controller.value.position <
             controller.value.duration - const Duration(seconds: 2)) {
-      print('video almost Ended');
       textHolder = fortune;
     }
     else if(controller.value.position >=
         controller.value.duration - const Duration(seconds: 2) ) {
-      print('video Ended');
       textHolder = '';
       Navigator.push(
         context,
@@ -126,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _ad = BannerAd(
         size: AdSize.banner,
         adUnitId: AdHelper.bannerAdUnitId,
-        request: AdRequest(),
+        request: const AdRequest(),
         listener: BannerAdListener(
             onAdLoaded: (_) {
               setState(() {
@@ -176,10 +210,22 @@ class _MyHomePageState extends State<MyHomePage> {
         dynamic jj = jsonDecode(response);
         fortune = jj['data']['fortune'];
 
+        // fortune to specific date
         DateTime now = DateTime.now();
         var formatter = DateFormat('yyyy-MMM-dd');
         String formattedDate = formatter.format(now);
-        addFortuneForDate(formattedDate, fortune);
+        widget.storage.writeFortuneForDate(formattedDate, fortune);
+
+        // add first date to dates table
+        widget.storage.readDates().then((value) {
+          setState(() {
+            // if any date is included, pass
+            if(value.length > 1){}
+            else {
+              widget.storage.writeDates(formattedDate);
+            }
+          });
+        });
       });
     } else { print("RESPONSE can not obtained "); }
   }
@@ -193,9 +239,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void addFortuneForDate(String date, String fortune) {
-    widget.storage.writeFortuneForDate(date, fortune);
-  }
 
   void showFortunes(String date){
     widget.storage.readFortunesForDate(date).then((value) {
@@ -208,7 +251,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget fortunes_dates(BuildContext context) {
     return Wrap(
       children: [
-        for (var item in dates)
+        for (var item in _dates)
           Wrap(
             children: [
               FloatingActionButton(

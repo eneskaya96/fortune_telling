@@ -20,6 +20,11 @@ class CounterStorage {
     return File('$path/is_first_time.txt');
   }
 
+  Future<File> get _localFileDates async {
+    final path = await _localPath;
+    return File('$path/dates.txt');
+  }
+
   Future<File> _localFileFortunesDate(String date) async{
     final path = await _localPath;
     return File('$path/$date.txt');
@@ -61,6 +66,21 @@ class CounterStorage {
     }
   }
 
+  Future<String> readDates() async {
+    try {
+      final file = await _localFileDates;
+      // Read the file
+      final contents = await file.readAsString();
+      if (contents.isEmpty){
+        return "";
+      }
+      return contents;
+    } catch (e) {
+      // If encountering an error
+      return "";
+    }
+  }
+
   Future<String> readFortunesForDate(String date) async {
     try {
       final file = await _localFileFortunesDate(date);
@@ -74,6 +94,14 @@ class CounterStorage {
       // If encountering an error
       return "X";
     }
+  }
+
+  Future<File> writeDates(String date) async {
+    final file = await _localFileDates;
+
+    // Write the file
+    //return file.writeAsString(date, mode: FileMode.append);
+    return file.writeAsString(date);
   }
 
   Future<File> writeFortuneForDate(String date, String fortune) async {
