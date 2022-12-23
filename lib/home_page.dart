@@ -26,7 +26,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  final ScrollController _scrollController = new ScrollController();
   late VideoPlayerController controller;
+
   late Timer timer;
 
   late BannerAd _ad;
@@ -40,7 +42,12 @@ class _MyHomePageState extends State<MyHomePage> {
   late DateTime readed_time ;
   late String token;
 
+  int selectedItemIndex = 0;
+  String selectedItem = '2022-Dec-23';
+
   String fortunesHolder = "";
+  List<Widget> tiles =  <Widget>[];
+  bool created = false;
 
   final List<String> _dates = <String>['2022-Dec-19', '2022-Dec-20', '2022-Dec-21', '2022-Dec-22', '2022-Dec-23', '2022-Dec-24'];
 
@@ -66,9 +73,9 @@ class _MyHomePageState extends State<MyHomePage> {
         readed_time = DateTime.parse(value);
       });
     });
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
+    timer = Timer.periodic(const Duration(milliseconds: 1000), (Timer t) =>
         setState(() {
-          _timer_job();
+          _timer_job(formattedDate);
         }));
 
     _loadBanner();
@@ -109,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _timer_job() {
+  void _timer_job(String formattedDate) {
     timeTextHolder = widget.storage.getRemainigTime(readed_time);
 
     // Write time to
@@ -130,8 +137,29 @@ class _MyHomePageState extends State<MyHomePage> {
       );
       timer.cancel();
     }
+
+    // create date container and scroll
+    if(created == false){
+      reCreateDate(formattedDate);
+      created = true;
+    }
+    _scrollDown();
   }
 
+  void reCreateDate(String sItem){
+    selectedItem = sItem;
+    tiles.clear();
+    int count = 1;
+    for (var item in _dates){
+      //print("item " + item);
+      tiles.add(mytile(item));
+      if(item == selectedItem){
+        selectedItemIndex = count;
+      }
+      count = count + 1;
+    }
+
+  }
   @override
   void dispose() {
     if (Platform.isAndroid || Platform.isIOS) {
@@ -230,17 +258,6 @@ class _MyHomePageState extends State<MyHomePage> {
     } else { print("RESPONSE can not obtained "); }
   }
 
-  myStyle() {
-    return GoogleFonts.montserrat(
-      textStyle: Theme.of(context).textTheme.headline4,
-      fontSize: 10,
-      fontWeight: FontWeight.w700,
-      color: const Color.fromRGBO(0, 0, 0, 0.7),
-      backgroundColor: Colors.transparent
-    );
-  }
-
-
   void showFortunes(String date){
     widget.storage.readFortunesForDate(date).then((value) {
       setState(() {
@@ -252,39 +269,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget fortunes_dates(BuildContext context) {
     return Wrap(
       children: [
-        for (var item in _dates)
+        for (var t in tiles)
           Wrap(
             children: [
               Container(
                 width: 50,
                 height: 50,
-                child: GestureDetector(
-                  onTap: () {
-                    showFortunes(item);
-                  }, // Image tapped
-                  child:
-                  Stack(
-                    children: [
-                      Image.asset(
-                        "images/elips_orange.png",
-                        fit: BoxFit.contain,
-                      ),
-                      Container(
-                        alignment: Alignment.center,
-                        child: Column(
-                          children: [
-                            Spacer(),
-                            Text(item.split("-")[2],
-                                style: myStyle()),
-                            Text(item.split("-")[1],
-                                style: myStyle()),
-                            Spacer(),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
+                child: t
               ),
               SizedBox(width: 20),
             ],
@@ -363,7 +354,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                               child: SingleChildScrollView(
                                 controller: scrollController,
-                                child: Container(
+                                child:
+                                  Container(
                                     child: Column(
                                       children: [
                                         SizedBox(height: 10,),
@@ -372,11 +364,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                           height: 5,
                                           color: Colors.grey[200],
                                         ),
-                                        SingleChildScrollView(
-                                          reverse: true,
-                                          padding: EdgeInsets.fromLTRB(20.0, 20.0, 10.0, 10.0),
-                                          scrollDirection: Axis.horizontal,
-                                          child: fortunes_dates(context),
+                                        Center(
+                                          child:SingleChildScrollView(
+                                            controller: _scrollController,
+                                            reverse: false,
+                                            padding: EdgeInsets.fromLTRB(20.0, 20.0, 10.0, 10.0),
+                                            scrollDirection: Axis.horizontal,
+                                            child: fortunes_dates(context),
+                                          ),
                                         ),
                                         Text(fortunesHolder),
                                       ],
@@ -391,6 +386,59 @@ class _MyHomePageState extends State<MyHomePage> {
               )
           ),
         ),
+    );
+  }
+
+  void _scrollDown() {
+    double jumpPosition = 72.00 * (selectedItemIndex - 3) ; // 15 - 3 baş -3 son = 9 -----  scrol size / 9 = 72
+    jumpPosition = jumpPosition < 0 ? 0.0 : jumpPosition;
+    jumpPosition = jumpPosition > _scrollController.position.maxScrollExtent ? _scrollController.position.maxScrollExtent : jumpPosition;
+
+    _scrollController.animateTo(
+      jumpPosition,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
+  myStyle() {
+    return GoogleFonts.montserrat(
+        textStyle: Theme.of(context).textTheme.headline4,
+        fontSize: 10,
+        fontWeight: FontWeight.w700,
+        color: const Color.fromRGBO(0, 0, 0, 0.7),
+        backgroundColor: Colors.transparent
+    );
+  }
+
+  Widget mytile(String item) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          reCreateDate(item);
+        });
+      }, // Image tapped
+      child:
+      Stack(
+        children: [
+          Image.asset( selectedItem == item ? "images/elips_yellow.png" : "images/elips_orange.png",
+            fit: BoxFit.contain,
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: Column(
+              children: [
+                Spacer(),
+                Text(item.split("-")[2],
+                    style: myStyle()),
+                Text(item.split("-")[1],
+                    style: myStyle()),
+                Spacer(),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }
