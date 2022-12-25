@@ -44,6 +44,8 @@ dependencies:
   google_fonts: ^3.0.1
   intl: ^0.18.0
   page_transition: ^2.0.9
+  social_share: ^2.3.1
+  screenshot: ^1.2.3
 
 
 dev_dependencies:

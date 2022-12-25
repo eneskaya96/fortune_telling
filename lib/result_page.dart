@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fortune_telling/home_page.dart';
+import 'package:social_share/social_share.dart';
 import 'package:universal_io/io.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:screenshot/screenshot.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'file_operations.dart';
+import 'package:path_provider/path_provider.dart';
 import 'ad_helper.dart';
 
 class ResultPage extends StatefulWidget {
@@ -32,6 +34,25 @@ class _ResultPageState extends State<ResultPage> {
   late DateTime readed_time ;
   late String token;
 
+
+  ScreenshotController screenshotController = ScreenshotController();
+
+  Future<String?> screenshot() async {
+    var data = await screenshotController.capture();
+    if (data == null) {
+      print("xxx");
+      return null;
+    }
+    final tempDir = await getTemporaryDirectory();
+    final assetPath = '${tempDir.path}/temp.png';
+    File file = await File(assetPath).create();
+    await file.writeAsBytes(data);
+    return file.path;
+  }
+
+
+
+
   getToken() async {
     token = (await FirebaseMessaging.instance.getToken())!;
   }
@@ -45,10 +66,13 @@ class _ResultPageState extends State<ResultPage> {
         readed_time = DateTime.parse(value);
       });
     });
+    /*
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
         setState(() {
           _timer_job();
         }));
+
+     */
 
     _loadBanner();
     _loadRewardedAd();
@@ -179,6 +203,35 @@ class _ResultPageState extends State<ResultPage> {
                         )
                     ),
                     _buildFloatingActionButton(),
+                    Container(
+                      alignment: Alignment.center,
+                      child: TextButton(
+                        onPressed: () async {
+                          print("ccccc");
+                          var path = await screenshot();
+                          if (path == null) {
+                            print("qqqq");
+                            return;
+                          }
+
+                          SocialShare.shareInstagramStory(
+                            appId: "888268445701700",
+                            imagePath: path,
+                            backgroundTopColor: "#ffffff",
+                            backgroundBottomColor: "#000000",
+                          ).then((data) {
+                            print("cccccllll");
+                            print(data);
+                          });
+                        },
+                        child: Text('SHARE ON INSTAGRAM'),
+
+                      ),
+                    ),
+                    Screenshot(
+                      controller: screenshotController,
+                      child: Text("This text will be captured as image"),
+                    ),
                   ]
                 ),
             ),

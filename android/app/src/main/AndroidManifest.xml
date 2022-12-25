@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.menesek.fortune_telling">
     <uses-permission
         android:name="android.permission.BLUETOOTH"
@@ -11,6 +12,16 @@
         android:label="fortune_telling"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
+       <provider
+           android:name="androidx.core.content.FileProvider"
+           android:authorities="${applicationId}.com.shekarmudaliyar.social_share"
+           android:exported="false"
+           android:grantUriPermissions="true"
+           tools:replace="android:authorities">
+           <meta-data
+               android:name="android.support.FILE_PROVIDER_PATHS"
+               android:resource="@xml/filepaths" />
+       </provider>
         <activity
             android:name=".MainActivity"
             android:exported="true"
