@@ -143,7 +143,6 @@ class _MyHomePageState extends State<MyHomePage> {
       reCreateDate(formattedDate);
       created = true;
     }
-    _scrollDown();
   }
 
   void reCreateDate(String sItem){
@@ -158,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       count = count + 1;
     }
-
+    _scrollDown();
   }
   @override
   void dispose() {
@@ -358,16 +357,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                   Container(
                                     child: Column(
                                       children: [
-                                        SizedBox(height: 10,),
-                                        Container(
-                                          width: 130,
-                                          height: 5,
-                                          color: Colors.grey[200],
+                                        const SizedBox(height: 10,),
+                                        Image.asset( "images/scrollThick.png" ,
+                                          fit: BoxFit.cover,
+                                          width: 200,
                                         ),
                                         Center(
                                           child:SingleChildScrollView(
                                             controller: _scrollController,
-                                            reverse: false,
+                                            reverse: true,
                                             padding: EdgeInsets.fromLTRB(20.0, 20.0, 10.0, 10.0),
                                             scrollDirection: Axis.horizontal,
                                             child: fortunes_dates(context),
@@ -393,6 +391,7 @@ class _MyHomePageState extends State<MyHomePage> {
     double jumpPosition = 72.00 * (selectedItemIndex - 3) ; // 15 - 3 baş -3 son = 9 -----  scrol size / 9 = 72
     jumpPosition = jumpPosition < 0 ? 0.0 : jumpPosition;
     jumpPosition = jumpPosition > _scrollController.position.maxScrollExtent ? _scrollController.position.maxScrollExtent : jumpPosition;
+    jumpPosition = _scrollController.position.maxScrollExtent - jumpPosition;
 
     _scrollController.animateTo(
       jumpPosition,
