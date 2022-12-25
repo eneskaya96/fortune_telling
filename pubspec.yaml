@@ -43,6 +43,7 @@ dependencies:
   video_player: ^2.4.9
   google_fonts: ^3.0.1
   intl: ^0.18.0
+  page_transition: ^2.0.9
 
 
 dev_dependencies:

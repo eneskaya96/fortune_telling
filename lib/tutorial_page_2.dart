@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fortune_telling/tutorial_page_3.dart';
+import 'package:page_transition/page_transition.dart';
 import 'file_operations.dart';
 
 class TutorialPage2 extends StatefulWidget {
@@ -62,9 +63,13 @@ class _TutorialPage2State extends State<TutorialPage2> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context)
-                          =>  TutorialPage3(title: "Tutorial 3",
-                            storage: widget.storage,)),
+                          PageTransition(
+                              type: PageTransitionType.rightToLeft,
+                              child: TutorialPage3(title: "Tutorial 3",
+                                storage: widget.storage,),
+                              duration: Duration(milliseconds: 300),
+                              inheritTheme: true,
+                              ctx: context),
                         );
                       },
                     ),

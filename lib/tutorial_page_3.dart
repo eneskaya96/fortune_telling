@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'file_operations.dart';
 import 'home_page.dart';
 
@@ -62,9 +63,13 @@ class _TutorialPage3State extends State<TutorialPage3> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context)
-                          =>  MyHomePage(title: "HOME",
-                              storage: widget.storage)),
+                          PageTransition(
+                              type: PageTransitionType.rightToLeft,
+                              child: MyHomePage(title: "HOME",
+                                  storage: widget.storage),
+                              duration: Duration(milliseconds: 300),
+                              inheritTheme: true,
+                              ctx: context),
                         );
                         updateFirstTime();
                       },

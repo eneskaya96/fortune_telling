@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fortune_telling/result_page.dart';
 import 'package:fortune_telling/tutorial_page_1.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
@@ -68,25 +69,37 @@ class _TransitionPageState extends State<TransitionPage> {
       if (isFirstTime){
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context)
-          =>  TutorialPage1(title: "Tutorial 1",
-                            storage: widget.storage,)),
+          PageTransition(
+              type: PageTransitionType.rightToLeft,
+              child: TutorialPage1(title: "Tutorial 1",
+                storage: widget.storage,),
+              duration: Duration(milliseconds: 300),
+              inheritTheme: true,
+              ctx: context),
         );
       }
       else if (remaining_time == "0:0:0") {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context)
-          =>  MyHomePage(title: "HOME",
-              storage: widget.storage)),
+          PageTransition(
+              type: PageTransitionType.rightToLeft,
+              child: MyHomePage(title: "HOME",
+                  storage: widget.storage),
+              duration: Duration(milliseconds: 300),
+              inheritTheme: true,
+              ctx: context),
         );
       }
       else {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context)
-          =>  ResultPage(title: "RESULT",
-              storage: widget.storage)),
+          PageTransition(
+              type: PageTransitionType.rightToLeft,
+              child: ResultPage(title: "RESULT",
+                  storage: widget.storage),
+              duration: Duration(milliseconds: 300),
+              inheritTheme: true,
+              ctx: context),
         );
       }
       timer.cancel();
