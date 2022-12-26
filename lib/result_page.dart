@@ -66,13 +66,11 @@ class _ResultPageState extends State<ResultPage> {
         readed_time = DateTime.parse(value);
       });
     });
-    /*
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
         setState(() {
           _timer_job();
         }));
 
-     */
 
     _loadBanner();
     _loadRewardedAd();

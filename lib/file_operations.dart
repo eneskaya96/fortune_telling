@@ -107,8 +107,10 @@ class CounterStorage {
   Future<File> writeFortuneForDate(String date, String fortune) async {
     final file = await _localFileFortunesDate(date);
 
+    fortune = "$fortune\n";
+
     // Write the file
-    return file.writeAsString(fortune);
+    return file.writeAsString(fortune, mode: FileMode.append);
   }
 
   Future<File> writeIsFirstTime(String isFirstTime) async {
