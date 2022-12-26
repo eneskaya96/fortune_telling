@@ -48,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String fortunesHolder = "";
   List<Widget> tiles =  <Widget>[];
   bool created = false;
+  bool buttonPressed = false;
 
   final List<String> _dates = <String>['2022-Dec-19', '2022-Dec-20', '2022-Dec-21', '2022-Dec-22', '2022-Dec-23', '2022-Dec-24'];
 
@@ -168,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _loadVideoPlayer(){
-    controller = VideoPlayerController.asset('images/newnew.mp4');
+    controller = VideoPlayerController.asset('images/animasyon.mp4');
     controller.addListener(() {
       setState(() {});
     });
@@ -287,6 +288,21 @@ class _MyHomePageState extends State<MyHomePage> {
     return false; //<-- SEE HERE
   }
 
+  Widget main_background(){
+    if(buttonPressed == true){
+      return VideoPlayer(controller);
+    }
+    else {
+      return Image.asset(
+        "images/button.gif",
+      );
+    }
+  }
+  void _rebuild() {
+    setState(() {
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -300,6 +316,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       onTap: () {
                         if (tappable) {
                           tappable = false;
+                          buttonPressed = true;
+                          _rebuild();
 
                           get_fortune();
                           DateTime time = DateTime.now();
@@ -310,7 +328,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
                       }, // Image tapped
                       child: SizedBox(
-                        child: VideoPlayer(controller),
+                        child: main_background(),
                       ),
                     ),
                     Container(
@@ -415,6 +433,7 @@ class _MyHomePageState extends State<MyHomePage> {
       onTap: () {
         setState(() {
           reCreateDate(item);
+          showFortunes(item);
         });
       }, // Image tapped
       child:

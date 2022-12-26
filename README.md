@@ -22,3 +22,8 @@ then run this
 #### Notification 
 
     https://medium.com/@alaa07996/firebase-push-notifications-with-flutter-6848892a1c15
+
+
+## share on instagram
+
+    https://pub.dev/packages/social_share
