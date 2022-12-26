@@ -12,6 +12,7 @@ import 'file_operations.dart';
 import 'http_request.dart';
 import 'ad_helper.dart';
 import 'package:intl/intl.dart';
+import 'dart:ui';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title, required this.storage}) : super(key: key);
@@ -25,6 +26,14 @@ class MyHomePage extends StatefulWidget {
 
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  // Screen size in density independent pixels
+  var screenWidth = (window.physicalSize.shortestSide / window.devicePixelRatio);
+  var screenHeight = (window.physicalSize.longestSide / window.devicePixelRatio);
+
+// Screen size in real pixels
+  var screenWidthPixels = window.physicalSize.shortestSide;
+  var screenHeightPixels = window.physicalSize.longestSide;
 
   final ScrollController _scrollController = new ScrollController();
   late VideoPlayerController controller;
@@ -49,6 +58,8 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> tiles =  <Widget>[];
   bool created = false;
   bool buttonPressed = false;
+
+
 
   final List<String> _dates = <String>['2022-Dec-19', '2022-Dec-20', '2022-Dec-21', '2022-Dec-22', '2022-Dec-23', '2022-Dec-24'];
 
@@ -290,14 +301,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget main_background(){
     if(buttonPressed == true){
-      return VideoPlayer(controller);
+      return Container(
+        width: screenWidthPixels,
+        height: screenHeightPixels,
+        child: VideoPlayer(controller),
+      );
     }
     else {
-      return Image.asset(
-        "images/button.gif",
+      return Container(
+          width: screenWidthPixels,
+          height: screenHeightPixels,
+          child: Image.asset("images/button.gif",
+          fit: BoxFit.fill,)
       );
     }
   }
+
   void _rebuild() {
     setState(() {
     });
