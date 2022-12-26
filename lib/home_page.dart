@@ -99,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
 
         DateTime now = DateTime.now();
-        DateTime twoDayAfterNow = now.add(const Duration(days: 3));
+        DateTime twoDayAfterNow = now.add(const Duration(days: 2, minutes: 20));
         var formatter = DateFormat('yyyy-MMM-dd');
 
         DateTime startDate;
