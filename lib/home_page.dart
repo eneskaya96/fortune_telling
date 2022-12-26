@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
-  final List<String> _dates = <String>['2022-Dec-19', '2022-Dec-20', '2022-Dec-21', '2022-Dec-22', '2022-Dec-23', '2022-Dec-24'];
+  final List<String> _dates = <String>[];
 
 
   getToken() async {
@@ -283,15 +283,16 @@ class _MyHomePageState extends State<MyHomePage> {
         for (var t in tiles)
           Wrap(
             children: [
+              SizedBox(width: screenWidth / 20), // screenWidth / 20 = date spacer width
               Container(
-                width: 50,
-                height: 50,
+                width: (screenWidth / 5) - (screenWidth / 20), // screenWidth / 5 - (screenWidth / 20) = date width
+                height: (screenWidth / 5) - (screenWidth / 20),
                 child: t
               ),
-              SizedBox(width: 20),
             ],
-          )
-      ],
+          ),
+        SizedBox(width: screenWidth / 20),
+       ],
     );
   }
 
@@ -403,7 +404,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                           child:SingleChildScrollView(
                                             controller: _scrollController,
                                             reverse: true,
-                                            padding: EdgeInsets.fromLTRB(20.0, 20.0, 10.0, 10.0),
+                                            padding: EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 10.0),
                                             scrollDirection: Axis.horizontal,
                                             child: fortunes_dates(context),
                                           ),
@@ -425,9 +426,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _scrollDown() {
-    double jumpPosition = 72.00 * (selectedItemIndex - 3) ; // 15 - 3 baş -3 son = 9 -----  scrol size / 9 = 72
-    jumpPosition = jumpPosition < 0 ? 0.0 : jumpPosition;
-    jumpPosition = jumpPosition > _scrollController.position.maxScrollExtent ? _scrollController.position.maxScrollExtent : jumpPosition;
+
+    double margin = (screenWidth / 20) / 2;
+    double jumpPosition = margin;
+
+    if (selectedItemIndex <= 3){
+      jumpPosition = jumpPosition;
+    }
+    else {
+      double step = (screenWidth / 5);
+      jumpPosition = jumpPosition + (selectedItemIndex - 3) * step;
+    }
+
+    if(jumpPosition > _scrollController.position.maxScrollExtent){
+      jumpPosition = _scrollController.position.maxScrollExtent - margin;
+    }
+
+    // because of reverse
     jumpPosition = _scrollController.position.maxScrollExtent - jumpPosition;
 
     _scrollController.animateTo(
