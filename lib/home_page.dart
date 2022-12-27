@@ -59,6 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool created = false;
   bool buttonPressed = false;
 
+  double lenOfFortune = 4;
 
 
   final List<String> _dates = <String>[];
@@ -249,6 +250,9 @@ class _MyHomePageState extends State<MyHomePage> {
         dynamic jj = jsonDecode(response);
         fortune = jj['data']['fortune'];
 
+        lenOfFortune = fortune.length as double;
+        print("lenOfFortune" + lenOfFortune.toString());
+
         // fortune to specific date
         DateTime now = DateTime.now();
         var formatter = DateFormat('yyyy-MMM-dd');
@@ -300,6 +304,51 @@ class _MyHomePageState extends State<MyHomePage> {
     return false; //<-- SEE HERE
   }
 
+  Widget mainPageBackgroundTexts(){
+    if(buttonPressed != true){
+      return Container(
+          padding: EdgeInsets.fromLTRB(15.0, 185.0, 0.0, 10.0),
+          width: 200,
+          height: 270,
+          child:
+          Container(
+            alignment: Alignment.topLeft,
+            child: Column(
+              children: [
+                Container(
+                  alignment: Alignment.topLeft,
+                  child: Text("Hello !",
+                    style: GoogleFonts.montserrat(
+                      textStyle: Theme.of(context).textTheme.headline4,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w700,
+                      color: const Color.fromRGBO(0, 0, 0, 0.7),
+                    ),
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.topLeft,
+                  child: Text("You are very close \n"
+                      "knowing what will happen \n"
+                      "in your life today",
+                    style: GoogleFonts.montserrat(
+                      textStyle: Theme.of(context).textTheme.headline4,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: const Color.fromRGBO(0, 0, 0, 0.7),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+      );
+    }
+    else {
+      return Container();
+    }
+  }
+
   Widget main_background(){
     if(buttonPressed == true){
       return Container(
@@ -310,10 +359,29 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     else {
       return Container(
-          width: screenWidthPixels,
-          height: screenHeightPixels,
-          child: Image.asset("images/button.gif",
-          fit: BoxFit.fill,)
+        alignment: Alignment.center,
+        child: GestureDetector(
+          onTap: () {
+            if (tappable) {
+              tappable = false;
+              buttonPressed = true;
+              _rebuild();
+
+              get_fortune();
+              DateTime time = DateTime.now();
+              widget.storage.writeTime(time.toIso8601String());
+              readed_time = time;
+              controller.play();
+            }
+          }, // Image tapped
+          child: Container(
+              width: 200,
+              height: 200,
+              alignment: Alignment.center,
+              child: Image.asset("images/button.gif",
+                fit: BoxFit.fill,)
+          )
+        )
       );
     }
   }
@@ -328,41 +396,38 @@ class _MyHomePageState extends State<MyHomePage> {
     return WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
+          backgroundColor: const Color.fromRGBO(249, 249, 250, 1.0),
           body: Center(
               child:
               Stack(
                   children: [
                     GestureDetector(
                       onTap: () {
-                        if (tappable) {
-                          tappable = false;
-                          buttonPressed = true;
-                          _rebuild();
-
-                          get_fortune();
-                          DateTime time = DateTime.now();
-                          widget.storage.writeTime(time.toIso8601String());
-                          readed_time = time;
-                          controller.play();
-                        }
-
+                       print("tt");
                       }, // Image tapped
                       child: SizedBox(
-                        child: main_background(),
+                        width: screenWidthPixels,
+                        height: screenHeightPixels,
+                        child: Image.asset( "images/background_pattern.png" ,
+                          fit: BoxFit.fill,
+                        ),
                       ),
                     ),
+                    main_background(),
                     Container(
                         alignment: Alignment.center,
-                        child: Text(
-                          textHolder,
-                          style: GoogleFonts.montserrat(
-                            textStyle: Theme.of(context).textTheme.headline4,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: const Color.fromRGBO(255, 255, 255, 0.7),
-                          ),
-                        )
+                        child: resultFortuneWidget(),
                     ),
+                    Container(
+                      alignment: Alignment.topCenter,
+                      padding: EdgeInsets.fromLTRB(0.0, 75.0, 0.0, 10.0),
+                      child: Image.asset( "images/logo.png" ,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                    mainPageBackgroundTexts(),
                     Container(
                         alignment: Alignment.topCenter,
                         child: Text(
@@ -492,6 +557,37 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
     );
+  }
+
+  Widget resultFortuneWidget() {
+    if(fortune == ""){
+      return  Text(
+          textHolder,
+          style: GoogleFonts.montserrat(
+            textStyle: Theme.of(context).textTheme.headline4,
+            fontSize: (40 / lenOfFortune),
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
+      );
+    }
+    else{
+      return Container(
+        alignment: Alignment.center,
+        color: Colors.red,
+        width: 75,
+        height: 20,
+        child: Text(
+          textHolder,
+          style: GoogleFonts.montserrat(
+            textStyle: Theme.of(context).textTheme.headline4,
+            fontSize: (40 / lenOfFortune),
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
+        ),
+      );
+    }
   }
 }
 
