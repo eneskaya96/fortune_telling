@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fortune_telling/result_page.dart';
 import 'package:universal_io/io.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,11 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var screenWidth = (window.physicalSize.shortestSide / window.devicePixelRatio);
   var screenHeight = (window.physicalSize.longestSide / window.devicePixelRatio);
 
-// Screen size in real pixels
-  var screenWidthPixels = window.physicalSize.shortestSide;
-  var screenHeightPixels = window.physicalSize.longestSide;
-
-  final ScrollController _scrollController = new ScrollController();
+  final ScrollController _scrollController = ScrollController();
   late VideoPlayerController controller;
 
   late Timer timer;
@@ -46,29 +41,20 @@ class _MyHomePageState extends State<MyHomePage> {
   bool tappable = true;
 
   String fortune = "";
-  String textHolder = "";
-  String timeTextHolder = "XXX";
-  late DateTime readed_time ;
-  late String token;
+  String fortuneTextHolder = "";
 
   int selectedItemIndex = 0;
-  String selectedItem = '2022-Dec-23';
+  late String selectedItem;
 
   String fortunesHolder = "";
-  List<Widget> tiles =  <Widget>[];
+  List<Widget> dateContainer =  <Widget>[];
+  final List<String> _dates = <String>[];
   bool created = false;
   bool buttonPressed = false;
 
   double lenOfFortune = 4;
 
-
-  final List<String> _dates = <String>[];
-
-
-  getToken() async {
-    token = (await FirebaseMessaging.instance.getToken())!;
-  }
-
+  // built in functions
   @override
   void initState() {
     super.initState();
@@ -79,20 +65,19 @@ class _MyHomePageState extends State<MyHomePage> {
     DateTime now = DateTime.now();
     var formatter = DateFormat('yyyy-MMM-dd');
     String formattedDate = formatter.format(now);
-    showFortunes(formattedDate);
+    readFortunesFromLocalStorage(formattedDate);
 
-    widget.storage.readTime().then((value) {
-      setState(() {
-        readed_time = DateTime.parse(value);
-      });
-    });
     timer = Timer.periodic(const Duration(milliseconds: 1000), (Timer t) =>
         setState(() {
-          _timer_job(formattedDate);
+          _timerJob(formattedDate);
         }));
 
     _loadBanner();
     _loadVideoPlayer();
+  }
+
+  Future<bool> _onWillPop() async {
+    return false; //<-- SEE HERE
   }
 
   @override
@@ -109,10 +94,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   tapButtonOrVideoWidget(),
                   shownFortuneAtTheEndOfVideoWidget(),
                   logoWidget(),
-                  mainPageBackgroundTexts(),
-                  tapHereTexts(),
+                  mainPageBackgroundTextsWidget(),
+                  tapHereTextWidget(),
                   calenderMenuWidget(),
-                  checkForAd(),
+                  bannerAdWidget(),
                 ]
             )
         ),
@@ -128,220 +113,40 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  void readDates() {
-    widget.storage.readDates().then((value) {
-      setState(() {
-
-        DateTime now = DateTime.now();
-        DateTime twoDayAfterNow = now.add(const Duration(days: 2, minutes: 20));
-        var formatter = DateFormat('yyyy-MMM-dd');
-
-        DateTime startDate;
-        // control initial date is empty case
-        if (value == ""){
-          startDate = now.add(const Duration(days: - 3));
-        }
-        else{
-          startDate = formatter.parse(value);
-          // if start date close to now date
-          if (startDate.compareTo(now.add(const Duration(days: - 3))) > 0){
-            startDate = now.add(const Duration(days: - 3));
-          }
-        }
-
-        // clear _dates list
-        _dates.clear();
-
-        while ( startDate.compareTo(twoDayAfterNow) < 0) {
-          String formattedDate = formatter.format(startDate);
-          _dates.add(formattedDate);
-
-          startDate = startDate.add(const Duration(days: 1));
-        }
-      });
-    });
-  }
-
-  void _timer_job(String formattedDate) {
-    timeTextHolder = widget.storage.getRemainigTime(readed_time);
-
-    // Write time to
-    if(controller.value.position >=
-        controller.value.duration - const Duration(seconds: 9) &&
-        controller.value.position <
-            controller.value.duration - const Duration(seconds: 2)) {
-      textHolder = fortune;
-    }
-    else if(controller.value.position >=
-        controller.value.duration - const Duration(seconds: 2) ) {
-      textHolder = '';
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context)
-        =>  ResultPage(title: "Result Page",
-            storage: widget.storage)),
-      );
-      timer.cancel();
-    }
-
-    // create date container and scroll
-    if(created == false){
-      reCreateDate(formattedDate);
-      created = true;
-    }
-  }
-
-  void reCreateDate(String sItem){
-    selectedItem = sItem;
-    tiles.clear();
-    int count = 1;
-    for (var item in _dates){
-      //print("item " + item);
-      tiles.add(mytile(item));
-      if(item == selectedItem){
-        selectedItemIndex = count;
-      }
-      count = count + 1;
-    }
-    _scrollDown();
-  }
-
-
-  void _loadVideoPlayer(){
-    controller = VideoPlayerController.asset('images/square_animation.mp4');
-    controller.addListener(() {
-      setState(() {});
-    });
-    controller.initialize().then((value){
-      setState(() {});
-    });
-  }
-  void _loadBanner() {
-    // Admod initialized if mobile
-    if (Platform.isAndroid || Platform.isIOS) {
-      WidgetsFlutterBinding.ensureInitialized();
-      MobileAds.instance.initialize();
-    }
-
-    if (AdHelper.bannerAdUnitId != "UnsupportedPlatform"){
-      _ad = BannerAd(
-        size: AdSize.banner,
-        adUnitId: AdHelper.bannerAdUnitId,
-        request: const AdRequest(),
-        listener: BannerAdListener(
-            onAdLoaded: (_) {
-              setState(() {
-                isLoaded = true;
-              });
-            },
-            onAdFailedToLoad: (_, error) {
-              print("Ad failed to load error $error");
-            }
-        ),
-      );
-      _ad.load();
-    }
-  }
-
-  Widget checkForAd() {
-    if(buttonPressed != true) {
-      if (isLoaded = true & Platform.isAndroid || Platform.isIOS) {
-        return
-          Column(
-              children: [
-                const Spacer(),
-                Row(
-                  children: [
-                    const Spacer(),
-                    Container(
-                      width: _ad.size.width.toDouble(),
-                      height: _ad.size.height.toDouble(),
-                      alignment: Alignment.topCenter,
-                      child: AdWidget(
-                        ad: _ad,
-                      ),
+  // widget functions
+  Widget bannerAdWidget() {
+    if (buttonPressed != true && isLoaded == true & (Platform.isAndroid || Platform.isIOS)) {
+      return
+        Column(
+            children: [
+              const Spacer(),
+              Row(
+                children: [
+                  const Spacer(),
+                  Container(
+                    width: _ad.size.width.toDouble(),
+                    height: _ad.size.height.toDouble(),
+                    alignment: Alignment.topCenter,
+                    child: AdWidget(
+                      ad: _ad,
                     ),
-                    const Spacer(),
-                  ],
-                ),
-                SizedBox(height: 20), // TODO: make orantılı
-              ]
-          );
-      }
-      else {
-        return CircularProgressIndicator();
-      }
+                  ),
+                  const Spacer(),
+                ],
+              ),
+              const SizedBox(height: 20), // TODO: make it scale
+            ]
+        );
     }
-    else{
+    else {
       return Container();
     }
   }
 
-  Future<void> get_fortune() async {
-    String response = await get_fortune_();
-    if (response.isNotEmpty) {
-      setState(() {
-        dynamic jj = jsonDecode(response);
-        fortune = jj['data']['fortune'];
-
-        lenOfFortune = fortune.length as double;
-        print("lenOfFortune" + lenOfFortune.toString());
-
-        // fortune to specific date
-        DateTime now = DateTime.now();
-        var formatter = DateFormat('yyyy-MMM-dd');
-        String formattedDate = formatter.format(now);
-        widget.storage.writeFortuneForDate(formattedDate, fortune);
-
-        // add first date to dates table
-        widget.storage.readDates().then((value) {
-          setState(() {
-            // if any date is included, pass
-            if(value.length > 1){}
-            else {
-              widget.storage.writeDates(formattedDate);
-            }
-          });
-        });
-      });
-    } else { print("RESPONSE can not obtained "); }
-  }
-
-  void showFortunes(String date){
-    widget.storage.readFortunesForDate(date).then((value) {
-      setState(() {
-        fortunesHolder = value;
-      });
-    });
-  }
-
-  Widget fortunes_dates(BuildContext context) {
-    return Wrap(
-      children: [
-        for (var t in tiles)
-          Wrap(
-            children: [
-              SizedBox(width: screenWidth / 20), // screenWidth / 20 = date spacer width
-              Container(
-                width: (screenWidth / 5) - (screenWidth / 20), // screenWidth / 5 - (screenWidth / 20) = date width
-                height: (screenWidth / 5) - (screenWidth / 20),
-                child: t
-              ),
-            ],
-          ),
-        SizedBox(width: screenWidth / 20),
-       ],
-    );
-  }
-
-  Future<bool> _onWillPop() async {
-    return false; //<-- SEE HERE
-  }
-
-  Widget tapHereTexts(){
+  Widget tapHereTextWidget(){
     if(buttonPressed != true){
       return Container(
-          padding: EdgeInsets.fromLTRB(0.0, 200.0, 0.0, 10.0),
+          padding: const EdgeInsets.fromLTRB(0.0, 200.0, 0.0, 10.0),
           child:
           Container(
             alignment: Alignment.center,
@@ -361,10 +166,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Widget mainPageBackgroundTexts(){
+  Widget mainPageBackgroundTextsWidget(){
     if(buttonPressed != true){
       return Container(
-          padding: EdgeInsets.fromLTRB(0.0, 200.0, 0.0, 10.0),
+          padding: const EdgeInsets.fromLTRB(0.0, 200.0, 0.0, 10.0),
           child:
           Container(
             alignment: Alignment.center,
@@ -387,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     Container(
                       //color: Colors.red,
-                      padding: EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 10.0),
+                      padding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 10.0),
                       alignment: Alignment.bottomCenter,
                       child: Image.asset("images/hello_stick.png",
                         width: 180,
@@ -443,19 +248,18 @@ class _MyHomePageState extends State<MyHomePage> {
               buttonPressed = true;
               _rebuild();
 
-              get_fortune();
+              getFortune();
               DateTime time = DateTime.now();
               widget.storage.writeTime(time.toIso8601String());
-              readed_time = time;
               controller.play();
             }
           }, // Image tapped
           child: Container(
-              width: 200,
-              height: 200,
               alignment: Alignment.center,
               child: Image.asset("images/button.gif",
-                fit: BoxFit.fill,)
+                width: screenWidth / 3,
+                fit: BoxFit.contain,
+              )
           )
         )
       );
@@ -497,26 +301,24 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: SingleChildScrollView(
                   controller: scrollController,
                   child:
-                  Container(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 10,),
-                          Image.asset( "images/scrollThick.png" ,
-                            fit: BoxFit.cover,
-                            width: 200,
-                          ),
-                          Center(
-                            child:SingleChildScrollView(
-                              controller: _scrollController,
-                              reverse: true,
-                              padding: EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 10.0),
-                              scrollDirection: Axis.horizontal,
-                              child: fortunes_dates(context),
-                            ),
-                          ),
-                          Text(fortunesHolder),
-                        ],
-                      )
+                  Column(
+                    children: [
+                      const SizedBox(height: 10,),
+                      Image.asset( "images/scrollThick.png" ,
+                        fit: BoxFit.cover,
+                        width: 200,
+                      ),
+                      Center(
+                        child:SingleChildScrollView(
+                          controller: _scrollController,
+                          reverse: true,
+                          padding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 10.0),
+                          scrollDirection: Axis.horizontal,
+                          child: datesWidget(context),
+                        ),
+                      ),
+                      Text(fortunesHolder),
+                    ],
                   ),
                 )
             );
@@ -531,20 +333,168 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget backgroundImageWidget(){
     return GestureDetector(// Image tapped
       child: SizedBox(
-        width: screenWidthPixels,
-        height: screenHeightPixels,
+        width: screenWidth,
+        height: screenHeight,
         child: Image.asset( "images/background_pattern.png" ,
           fit: BoxFit.fill,
         ),
       ),
     );
   }
+
+  Widget shownFortuneAtTheEndOfVideoWidget() {
+    if(fortune == ""){
+      return  Container();
+    }
+    else{
+      return Container(
+        alignment: Alignment.center,
+        color: Colors.red,
+        width: 75,
+        height: 20,
+        child: Text(
+          fortuneTextHolder,
+          style: GoogleFonts.carroisGothic(
+            textStyle: Theme.of(context).textTheme.headline4,
+            fontSize: (40 / lenOfFortune),
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget datesWidget(BuildContext context) {
+    return Wrap(
+      children: [
+        for (var t in dateContainer)
+          Wrap(
+            children: [
+              SizedBox(width: screenWidth / 20), // screenWidth / 20 = date spacer width
+              SizedBox(
+                  width: (screenWidth / 5) - (screenWidth / 20), // screenWidth / 5 - (screenWidth / 20) = date width
+                  height: (screenWidth / 5) - (screenWidth / 20),
+                  child: t
+              ),
+            ],
+          ),
+        SizedBox(width: screenWidth / 20),
+      ],
+    );
+  }
+
+  Widget dateContainerWidget(String item) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          reCreateDate(item);
+          readFortunesFromLocalStorage(item);
+        });
+      }, // Image tapped
+      child:
+      Stack(
+        children: [
+          Image.asset( selectedItem == item ? "images/ellipse_yellow.png" : "images/ellipse_orange.png",
+            fit: BoxFit.contain,
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: Column(
+              children: [
+                const Spacer(),
+                Text(item.split("-")[2],
+                    style: myStyle()),
+                Text(item.split("-")[1],
+                    style: myStyle()),
+                const Spacer(),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  // styles
+  myStyle() {
+    return GoogleFonts.carroisGothic(
+        textStyle: Theme.of(context).textTheme.headline4,
+        fontSize: 10,
+        fontWeight: FontWeight.w700,
+        color: const Color.fromRGBO(249, 249, 250, 1),
+        backgroundColor: Colors.transparent
+    );
+  }
+
+  // inner functions
+  void _timerJob(String formattedDate) {
+
+    // Write time to
+    if(controller.value.position >=
+        controller.value.duration - const Duration(seconds: 9) &&
+        controller.value.position <
+            controller.value.duration - const Duration(seconds: 2)) {
+      fortuneTextHolder = fortune;
+    }
+    else if(controller.value.position >=
+        controller.value.duration - const Duration(seconds: 2) ) {
+      fortuneTextHolder = '';
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context)
+        =>  ResultPage(title: "Result Page",
+            storage: widget.storage)),
+      );
+      timer.cancel();
+    }
+
+    // create date container and scroll
+    if(created == false){
+      reCreateDate(formattedDate);
+      created = true;
+    }
+  }
+
+  void _loadVideoPlayer(){
+    controller = VideoPlayerController.asset('images/square_animation.mp4');
+    controller.addListener(() {
+      setState(() {});
+    });
+    controller.initialize().then((value){
+      setState(() {});
+    });
+  }
+
+  void _loadBanner() {
+    // Ad-mod initialized if mobile
+    if (Platform.isAndroid || Platform.isIOS) {
+      WidgetsFlutterBinding.ensureInitialized();
+      MobileAds.instance.initialize();
+    }
+
+    if (AdHelper.bannerAdUnitId != "UnsupportedPlatform"){
+      _ad = BannerAd(
+        size: AdSize.banner,
+        adUnitId: AdHelper.bannerAdUnitId,
+        request: const AdRequest(),
+        listener: BannerAdListener(
+            onAdLoaded: (_) {
+              setState(() {
+                isLoaded = true;
+              });
+            },
+            onAdFailedToLoad: (_, error) {}
+        ),
+      );
+      _ad.load();
+    }
+  }
+
   void _rebuild() {
     setState(() {
     });
   }
-
-
 
   void _scrollDown() {
 
@@ -573,68 +523,88 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  myStyle() {
-    return GoogleFonts.carroisGothic(
-        textStyle: Theme.of(context).textTheme.headline4,
-        fontSize: 10,
-        fontWeight: FontWeight.w700,
-        color: const Color.fromRGBO(249, 249, 250, 1),
-        backgroundColor: Colors.transparent
-    );
+  void readDates() {
+    widget.storage.readDates().then((value) {
+      setState(() {
+
+        DateTime now = DateTime.now();
+        DateTime twoDayAfterNow = now.add(const Duration(days: 2, minutes: 20));
+        var formatter = DateFormat('yyyy-MMM-dd');
+
+        DateTime startDate;
+        // control initial date is empty case
+        if (value == ""){
+          startDate = now.add(const Duration(days: - 3));
+        }
+        else{
+          startDate = formatter.parse(value);
+          // if start date close to now date
+          if (startDate.compareTo(now.add(const Duration(days: - 3))) > 0){
+            startDate = now.add(const Duration(days: - 3));
+          }
+        }
+
+        // clear _dates list
+        _dates.clear();
+
+        while ( startDate.compareTo(twoDayAfterNow) < 0) {
+          String formattedDate = formatter.format(startDate);
+          _dates.add(formattedDate);
+
+          startDate = startDate.add(const Duration(days: 1));
+        }
+      });
+    });
   }
 
-  Widget mytile(String item) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          reCreateDate(item);
-          showFortunes(item);
-        });
-      }, // Image tapped
-      child:
-      Stack(
-        children: [
-          Image.asset( selectedItem == item ? "images/elips_yellow.png" : "images/elips_orange.png",
-            fit: BoxFit.contain,
-          ),
-          Container(
-            alignment: Alignment.center,
-            child: Column(
-              children: [
-                Spacer(),
-                Text(item.split("-")[2],
-                    style: myStyle()),
-                Text(item.split("-")[1],
-                    style: myStyle()),
-                Spacer(),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget shownFortuneAtTheEndOfVideoWidget() {
-    if(fortune == ""){
-      return  Container();
+  void reCreateDate(String sItem){
+    selectedItem = sItem;
+    dateContainer.clear();
+    int count = 1;
+    for (var item in _dates){
+      dateContainer.add(dateContainerWidget(item));
+      if(item == selectedItem){
+        selectedItemIndex = count;
+      }
+      count = count + 1;
     }
-    else{
-      return Container(
-        alignment: Alignment.center,
-        color: Colors.red,
-        width: 75,
-        height: 20,
-        child: Text(
-          textHolder,
-          style: GoogleFonts.carroisGothic(
-            textStyle: Theme.of(context).textTheme.headline4,
-            fontSize: (40 / lenOfFortune),
-            fontWeight: FontWeight.w700,
-            color: Colors.black,
-          ),
-        ),
-      );
+    _scrollDown();
+  }
+
+  void readFortunesFromLocalStorage(String date){
+    widget.storage.readFortunesForDate(date).then((value) {
+      setState(() {
+        fortunesHolder = value;
+      });
+    });
+  }
+
+  Future<void> getFortune() async {
+    String response = await get_fortune_();
+    if (response.isNotEmpty) {
+      setState(() {
+        dynamic jj = jsonDecode(response);
+        fortune = jj['data']['fortune'];
+
+        lenOfFortune = fortune.length as double;
+
+        // fortune to specific date
+        DateTime now = DateTime.now();
+        var formatter = DateFormat('yyyy-MMM-dd');
+        String formattedDate = formatter.format(now);
+        widget.storage.writeFortuneForDate(formattedDate, fortune);
+
+        // add first date to dates table
+        widget.storage.readDates().then((value) {
+          setState(() {
+            // if any date is included, pass
+            if(value.length > 1){}
+            else {
+              widget.storage.writeDates(formattedDate);
+            }
+          });
+        });
+      });
     }
   }
 }
