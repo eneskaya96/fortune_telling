@@ -1,13 +1,9 @@
 import 'dart:async';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fortune_telling/result_page.dart';
 import 'package:fortune_telling/tutorial_page_1.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:video_player/video_player.dart';
 import 'file_operations.dart';
 import 'home_page.dart';
 
@@ -23,24 +19,22 @@ class TransitionPage extends StatefulWidget {
 
 class _TransitionPageState extends State<TransitionPage> {
 
-  late VideoPlayerController controller;
   late Timer timer;
 
-  late BannerAd _ad;
-  bool isLoaded = false;
-  var readed_time;
+  var readedTime;
   late String token;
   bool isFirstTime = false;
 
-  getToken() async {
-    token = (await FirebaseMessaging.instance.getToken())!;
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   void initState() {
     widget.storage.readTime().then((value) {
       setState(() {
-        readed_time = DateTime.parse(value);
+        readedTime = DateTime.parse(value);
       });
     });
 
@@ -50,22 +44,18 @@ class _TransitionPageState extends State<TransitionPage> {
       });
     });
 
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
+    timer = Timer.periodic(const Duration(milliseconds: 200), (Timer t) =>
         setState(() {
           _timer_job();
         }));
-
-    loadVideoPlayer();
   }
 
   void _timer_job(){
-    // video ended
-    if(controller.value.position == controller.value.duration) {
+    if(timer.tick > 33) {
 
-      String remaining_time = widget.storage.getRemainigTime(readed_time);
+      String remainingTime = widget.storage.getRemainigTime(readedTime);
 
       // open tutorial page
-      print(isFirstTime);
       if (isFirstTime){
         Navigator.push(
           context,
@@ -73,19 +63,19 @@ class _TransitionPageState extends State<TransitionPage> {
               type: PageTransitionType.rightToLeft,
               child: TutorialPage1(title: "Tutorial 1",
                 storage: widget.storage,),
-              duration: Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
               inheritTheme: true,
               ctx: context),
         );
       }
-      else if (remaining_time == "0:0:0") {
+      else if (remainingTime == "0:0:0") {
         Navigator.push(
           context,
           PageTransition(
               type: PageTransitionType.rightToLeft,
               child: MyHomePage(title: "HOME",
                   storage: widget.storage),
-              duration: Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
               inheritTheme: true,
               ctx: context),
         );
@@ -97,35 +87,13 @@ class _TransitionPageState extends State<TransitionPage> {
               type: PageTransitionType.rightToLeft,
               child: ResultPage(title: "RESULT",
                   storage: widget.storage),
-              duration: Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
               inheritTheme: true,
               ctx: context),
         );
       }
       timer.cancel();
-
     }
-  }
-
-  void loadVideoPlayer(){
-    controller = VideoPlayerController.asset('images/transition.mp4');
-    controller.setVolume(0.0);
-    controller.addListener(() {
-      setState(() {});
-    });
-    controller.initialize().then((value){
-      setState(() {
-        controller.play();
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    if (Platform.isAndroid || Platform.isIOS) {
-      _ad.dispose();
-    }
-    super.dispose();
   }
 
   Future<bool> _onWillPop() async {
@@ -138,22 +106,14 @@ class _TransitionPageState extends State<TransitionPage> {
       WillPopScope(
         onWillPop: _onWillPop,
         child:Scaffold(
-          body: Center(
-              child: Column(
-                children: <Widget>[
-                  Expanded(
-                    child:
-                    Stack(
-                        children: [
-                          GestureDetector( // Image tapped
-                            child: SizedBox(
-                              child: VideoPlayer(controller),
-                            ),
-                          )
-                        ]
-                    ),
-                  ),
-                ],
+          body:
+          SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: Image.asset( "images/transition_gif.gif" ,
+                ),
               )
           ),
         ) ,
