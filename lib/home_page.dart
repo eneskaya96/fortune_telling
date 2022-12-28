@@ -304,38 +304,76 @@ class _MyHomePageState extends State<MyHomePage> {
     return false; //<-- SEE HERE
   }
 
+  Widget tapHereTexts(){
+    if(buttonPressed != true){
+      return Container(
+          padding: EdgeInsets.fromLTRB(0.0, 200.0, 0.0, 10.0),
+          child:
+          Container(
+            alignment: Alignment.center,
+            child: Text("Tap for fortune !",
+              style: GoogleFonts.carroisGothic(
+                textStyle: Theme.of(context).textTheme.headline4,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: const Color.fromRGBO(38, 38, 38, 1),
+              ),
+            ),
+          )
+      );
+    }
+    else {
+      return Container();
+    }
+  }
+
   Widget mainPageBackgroundTexts(){
     if(buttonPressed != true){
       return Container(
-          padding: EdgeInsets.fromLTRB(15.0, 185.0, 0.0, 10.0),
-          width: 200,
-          height: 270,
+          padding: EdgeInsets.fromLTRB(0.0, 200.0, 0.0, 10.0),
           child:
           Container(
-            alignment: Alignment.topLeft,
+            alignment: Alignment.center,
+            //color: Colors.black,
             child: Column(
               children: [
-                Container(
-                  alignment: Alignment.topLeft,
-                  child: Text("Hello !",
-                    style: GoogleFonts.montserrat(
-                      textStyle: Theme.of(context).textTheme.headline4,
-                      fontSize: 25,
-                      fontWeight: FontWeight.w700,
-                      color: const Color.fromRGBO(0, 0, 0, 0.7),
+                Stack(
+                  children: [
+                    Container(
+                      alignment: Alignment.center,
+                      //color: Colors.blue,
+                      child: Text("Hello !",
+                        style: GoogleFonts.gothicA1(
+                          textStyle: Theme.of(context).textTheme.headline4,
+                          fontSize: 25,
+                          fontWeight: FontWeight.w700,
+                          color: const Color.fromRGBO(38, 38, 38, 1),
+                        ),
+                      ),
                     ),
-                  ),
+                    Container(
+                      //color: Colors.red,
+                      padding: EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 10.0),
+                      alignment: Alignment.bottomCenter,
+                      child: Image.asset("images/hello_stick.png",
+                        width: 180,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  ],
                 ),
+                
                 Container(
-                  alignment: Alignment.topLeft,
-                  child: Text("You are very close \n"
-                      "knowing what will happen \n"
-                      "in your life today",
-                    style: GoogleFonts.montserrat(
+                  alignment: Alignment.center,
+                  child: Text("You are very close to knowing \n"
+                      "what will happen in your life \n"
+                      "today ...",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.bodoniModa(
                       textStyle: Theme.of(context).textTheme.headline4,
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
-                      color: const Color.fromRGBO(0, 0, 0, 0.7),
+                      color: const Color.fromRGBO(172, 172, 172, 1),
                     ),
                   ),
                 ),
@@ -401,10 +439,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child:
               Stack(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                       print("tt");
-                      }, // Image tapped
+                    GestureDetector(// Image tapped
                       child: SizedBox(
                         width: screenWidthPixels,
                         height: screenHeightPixels,
@@ -422,17 +457,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       alignment: Alignment.topCenter,
                       padding: EdgeInsets.fromLTRB(0.0, 75.0, 0.0, 10.0),
                       child: Image.asset( "images/logo.png" ,
+                        fit: BoxFit.cover,
                         width: 100,
-                        height: 100,
-                        fit: BoxFit.fill,
                       ),
                     ),
                     mainPageBackgroundTexts(),
+                    tapHereTexts(),
                     Container(
                         alignment: Alignment.topCenter,
                         child: Text(
                           timeTextHolder,
-                          style: GoogleFonts.montserrat(
+                          style: GoogleFonts.carroisGothic(
                             textStyle: Theme.of(context).textTheme.headline4,
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
@@ -518,11 +553,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   myStyle() {
-    return GoogleFonts.montserrat(
+    return GoogleFonts.carroisGothic(
         textStyle: Theme.of(context).textTheme.headline4,
         fontSize: 10,
         fontWeight: FontWeight.w700,
-        color: const Color.fromRGBO(0, 0, 0, 0.7),
+        color: const Color.fromRGBO(249, 249, 250, 1),
         backgroundColor: Colors.transparent
     );
   }
@@ -563,7 +598,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if(fortune == ""){
       return  Text(
           textHolder,
-          style: GoogleFonts.montserrat(
+          style: GoogleFonts.carroisGothic(
             textStyle: Theme.of(context).textTheme.headline4,
             fontSize: (40 / lenOfFortune),
             fontWeight: FontWeight.w700,
@@ -579,7 +614,7 @@ class _MyHomePageState extends State<MyHomePage> {
         height: 20,
         child: Text(
           textHolder,
-          style: GoogleFonts.montserrat(
+          style: GoogleFonts.carroisGothic(
             textStyle: Theme.of(context).textTheme.headline4,
             fontSize: (40 / lenOfFortune),
             fontWeight: FontWeight.w700,
