@@ -95,6 +95,39 @@ class _MyHomePageState extends State<MyHomePage> {
     _loadVideoPlayer();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: const Color.fromRGBO(249, 249, 250, 1.0),
+        body: Center(
+            child:
+            Stack(
+                children: [
+                  backgroundImageWidget(),
+                  tapButtonOrVideoWidget(),
+                  shownFortuneAtTheEndOfVideoWidget(),
+                  logoWidget(),
+                  mainPageBackgroundTexts(),
+                  tapHereTexts(),
+                  calenderMenuWidget(),
+                  checkForAd(),
+                ]
+            )
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    if (Platform.isAndroid || Platform.isIOS) {
+      _ad.dispose();
+    }
+    super.dispose();
+  }
+
   void readDates() {
     widget.storage.readDates().then((value) {
       setState(() {
@@ -172,16 +205,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     _scrollDown();
   }
-  @override
-  void dispose() {
-    if (Platform.isAndroid || Platform.isIOS) {
-      _ad.dispose();
-    }
-    super.dispose();
-  }
+
 
   void _loadVideoPlayer(){
-    controller = VideoPlayerController.asset('images/animasyon.mp4');
+    controller = VideoPlayerController.asset('images/square_animation.mp4');
     controller.addListener(() {
       setState(() {});
     });
@@ -217,30 +244,37 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget checkForAd() {
-    if (isLoaded = true &  Platform.isAndroid || Platform.isIOS ) {
-      return
-        Column(
-            children: [
-              const Spacer(),
-              Row(
-                children: [
-                  const Spacer(),
-                  Container(
-                    width: _ad.size.width.toDouble(),
-                    height: _ad.size.height.toDouble(),
-                    alignment: Alignment.topCenter,
-                    child: AdWidget(
-                      ad: _ad,
+    if(buttonPressed != true) {
+      if (isLoaded = true & Platform.isAndroid || Platform.isIOS) {
+        return
+          Column(
+              children: [
+                const Spacer(),
+                Row(
+                  children: [
+                    const Spacer(),
+                    Container(
+                      width: _ad.size.width.toDouble(),
+                      height: _ad.size.height.toDouble(),
+                      alignment: Alignment.topCenter,
+                      child: AdWidget(
+                        ad: _ad,
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-              SizedBox(height: 20), // TODO: make orantılı
-            ]
-        );
+                    const Spacer(),
+                  ],
+                ),
+                SizedBox(height: 20), // TODO: make orantılı
+              ]
+          );
+      }
+      else {
+        return CircularProgressIndicator();
+      }
     }
-    else { return CircularProgressIndicator(); }
+    else{
+      return Container();
+    }
   }
 
   Future<void> get_fortune() async {
@@ -362,7 +396,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     )
                   ],
                 ),
-                
                 Container(
                   alignment: Alignment.center,
                   child: Text("You are very close to knowing \n"
@@ -387,12 +420,17 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Widget main_background(){
+  Widget tapButtonOrVideoWidget(){
     if(buttonPressed == true){
       return Container(
-        width: screenWidthPixels,
-        height: screenHeightPixels,
-        child: VideoPlayer(controller),
+        color: const Color.fromRGBO(249, 249, 250, 1.0),
+        alignment: Alignment.center,
+        child: Container(
+          alignment: Alignment.center,
+          width: screenWidth,
+          height: screenWidth,
+          child: VideoPlayer(controller),
+        ),
       );
     }
     else {
@@ -424,106 +462,89 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Widget logoWidget(){
+    if(buttonPressed != true) {
+      return Container(
+        alignment: Alignment.topCenter,
+        padding: const EdgeInsets.fromLTRB(0.0, 75.0, 0.0, 10.0),
+        child: Image.asset( "images/logo.png" ,
+          fit: BoxFit.cover,
+          width: 100,
+        ),
+      );
+    }
+    else {
+      return Container();
+    }
+  }
+
+  Widget calenderMenuWidget() {
+    if(buttonPressed != true) {
+      return DraggableScrollableSheet(
+        initialChildSize: 0.25,
+        maxChildSize: 0.85,
+        minChildSize: 0.25,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return
+            DecoratedBox(
+                decoration:  BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  image: const DecorationImage(
+                      image: AssetImage("images/calender.png"),
+                      fit: BoxFit.cover
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child:
+                  Container(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 10,),
+                          Image.asset( "images/scrollThick.png" ,
+                            fit: BoxFit.cover,
+                            width: 200,
+                          ),
+                          Center(
+                            child:SingleChildScrollView(
+                              controller: _scrollController,
+                              reverse: true,
+                              padding: EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 10.0),
+                              scrollDirection: Axis.horizontal,
+                              child: fortunes_dates(context),
+                            ),
+                          ),
+                          Text(fortunesHolder),
+                        ],
+                      )
+                  ),
+                )
+            );
+        },
+      );
+    }
+    else {
+      return Container();
+    }
+  }
+
+  Widget backgroundImageWidget(){
+    return GestureDetector(// Image tapped
+      child: SizedBox(
+        width: screenWidthPixels,
+        height: screenHeightPixels,
+        child: Image.asset( "images/background_pattern.png" ,
+          fit: BoxFit.fill,
+        ),
+      ),
+    );
+  }
   void _rebuild() {
     setState(() {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: _onWillPop,
-        child: Scaffold(
-          backgroundColor: const Color.fromRGBO(249, 249, 250, 1.0),
-          body: Center(
-              child:
-              Stack(
-                  children: [
-                    GestureDetector(// Image tapped
-                      child: SizedBox(
-                        width: screenWidthPixels,
-                        height: screenHeightPixels,
-                        child: Image.asset( "images/background_pattern.png" ,
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-                    ),
-                    main_background(),
-                    Container(
-                        alignment: Alignment.center,
-                        child: resultFortuneWidget(),
-                    ),
-                    Container(
-                      alignment: Alignment.topCenter,
-                      padding: EdgeInsets.fromLTRB(0.0, 75.0, 0.0, 10.0),
-                      child: Image.asset( "images/logo.png" ,
-                        fit: BoxFit.cover,
-                        width: 100,
-                      ),
-                    ),
-                    mainPageBackgroundTexts(),
-                    tapHereTexts(),
-                    Container(
-                        alignment: Alignment.topCenter,
-                        child: Text(
-                          timeTextHolder,
-                          style: GoogleFonts.carroisGothic(
-                            textStyle: Theme.of(context).textTheme.headline4,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: const Color.fromRGBO(0, 0, 0, 0.7),
-                          ),
-                        )
-                    ),
-                    DraggableScrollableSheet(
-                      initialChildSize: 0.25,
-                      maxChildSize: 0.85,
-                      minChildSize: 0.25,
-                      builder: (BuildContext context, ScrollController scrollController) {
-                        return
-                          DecoratedBox(
-                              decoration:  BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                image: const DecorationImage(
-                                    image: AssetImage("images/calender.png"),
-                                    fit: BoxFit.cover
-                                    ),
-                              ),
-                              child: SingleChildScrollView(
-                                controller: scrollController,
-                                child:
-                                  Container(
-                                    child: Column(
-                                      children: [
-                                        const SizedBox(height: 10,),
-                                        Image.asset( "images/scrollThick.png" ,
-                                          fit: BoxFit.cover,
-                                          width: 200,
-                                        ),
-                                        Center(
-                                          child:SingleChildScrollView(
-                                            controller: _scrollController,
-                                            reverse: true,
-                                            padding: EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 10.0),
-                                            scrollDirection: Axis.horizontal,
-                                            child: fortunes_dates(context),
-                                          ),
-                                        ),
-                                        Text(fortunesHolder),
-                                      ],
-                                    )
-                                ),
-                              )
-                          );
-                      },
-                    ),
-                    checkForAd(),
-                  ]
-              )
-          ),
-        ),
-    );
-  }
+
 
   void _scrollDown() {
 
@@ -594,17 +615,9 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget resultFortuneWidget() {
+  Widget shownFortuneAtTheEndOfVideoWidget() {
     if(fortune == ""){
-      return  Text(
-          textHolder,
-          style: GoogleFonts.carroisGothic(
-            textStyle: Theme.of(context).textTheme.headline4,
-            fontSize: (40 / lenOfFortune),
-            fontWeight: FontWeight.w700,
-            color: Colors.black,
-          ),
-      );
+      return  Container();
     }
     else{
       return Container(
