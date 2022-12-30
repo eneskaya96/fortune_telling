@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool created = false;
   bool buttonPressed = false;
 
-  double lenOfFortune = 4;
+  int lenOfFortune = 4;
 
   // built in functions
   @override

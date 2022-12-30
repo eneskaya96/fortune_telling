@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fortune_telling/tutorial_page_2.dart';
-import 'package:page_transition/page_transition.dart';
+import 'animations.dart';
 import 'file_operations.dart';
 
 class TutorialPage1 extends StatefulWidget {
@@ -18,25 +18,16 @@ class TutorialPage1 extends StatefulWidget {
 
 class _TutorialPage1State extends State<TutorialPage1> {
 
-  late Timer timer;
-
   @override
   void initState() {
     super.initState();
-
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
-        setState(() {
-          _timer_job();
-        }));
   }
 
-  void _timer_job(){
-    print("Timer");
-  }
 
   Future<bool> _onWillPop() async {
     return false; //<-- SEE HERE
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +36,12 @@ class _TutorialPage1State extends State<TutorialPage1> {
         child: Scaffold(
             body: Stack(
               children: [
-                Container(
+                SizedBox(
                     height: MediaQuery.of(context).size.height,
                     width: MediaQuery.of(context).size.width,
                     child: FittedBox(
-                      child: Image.asset('images/tutorial_page_1.jpg'),
                       fit: BoxFit.fill,
+                      child: Image.asset('images/tutorial_page_1.jpg'),
                     )
                 ),
                 Column(
@@ -69,12 +60,10 @@ class _TutorialPage1State extends State<TutorialPage1> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                PageTransition(
-                                    type: PageTransitionType.rightToLeft,
-                                    child: TutorialPage2(title: 'xx', storage: widget.storage,),
-                                    duration: Duration(milliseconds: 300),
-                                    inheritTheme: true,
-                                    ctx: context),
+                                pageTransitionAnimation(
+                                    TutorialPage2(title: '', storage: widget.storage,),
+                                    context
+                                )
                               );
                             },
                           ),

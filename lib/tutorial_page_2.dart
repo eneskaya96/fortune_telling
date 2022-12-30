@@ -1,8 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:fortune_telling/tutorial_page_3.dart';
-import 'package:page_transition/page_transition.dart';
+import 'animations.dart';
 import 'file_operations.dart';
 
 class TutorialPage2 extends StatefulWidget {
@@ -18,20 +16,9 @@ class TutorialPage2 extends StatefulWidget {
 
 class _TutorialPage2State extends State<TutorialPage2> {
 
-  late Timer timer;
-
   @override
   void initState() {
     super.initState();
-
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) =>
-        setState(() {
-          _timer_job();
-        }));
-  }
-
-  void _timer_job(){
-    print("Timer");
   }
 
   @override
@@ -39,12 +26,12 @@ class _TutorialPage2State extends State<TutorialPage2> {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
+          SizedBox(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
               child: FittedBox(
+                  fit: BoxFit.fill,
                   child: Image.asset('images/tutorial_page_2.jpg'),
-                fit: BoxFit.fill,
               )
           ),
           Column(
@@ -63,13 +50,10 @@ class _TutorialPage2State extends State<TutorialPage2> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          PageTransition(
-                              type: PageTransitionType.rightToLeft,
-                              child: TutorialPage3(title: "Tutorial 3",
-                                storage: widget.storage,),
-                              duration: Duration(milliseconds: 300),
-                              inheritTheme: true,
-                              ctx: context),
+                          pageTransitionAnimation(
+                              TutorialPage3(title: "Tutorial 3", storage: widget.storage),
+                              context
+                          ),
                         );
                       },
                     ),
@@ -82,7 +66,6 @@ class _TutorialPage2State extends State<TutorialPage2> {
       )
     );
   }
-
 }
 
 
