@@ -134,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   const Spacer(),
                 ],
               ),
-              const SizedBox(height: 20), // TODO: make it scale
+              SizedBox(height: (screenHeight / 50)),
             ]
         );
     }
@@ -146,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget tapHereTextWidget(){
     if(buttonPressed != true){
       return Container(
-          padding: const EdgeInsets.fromLTRB(0.0, 200.0, 0.0, 10.0),
+          padding: EdgeInsets.fromLTRB(0.0, screenHeight / 4.66, 0.0, screenWidth/43),
           child:
           Container(
             alignment: Alignment.center,
@@ -169,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget mainPageBackgroundTextsWidget(){
     if(buttonPressed != true){
       return Container(
-          padding: const EdgeInsets.fromLTRB(0.0, 200.0, 0.0, 10.0),
+          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 4.5, 0.0, 10.0),
           child:
           Container(
             alignment: Alignment.center,
@@ -192,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     Container(
                       //color: Colors.red,
-                      padding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 10.0),
+                      padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 46.5, 0.0, 10.0),
                       alignment: Alignment.bottomCenter,
                       child: Image.asset("images/hello_stick.png",
                         width: 180,
@@ -270,10 +270,10 @@ class _MyHomePageState extends State<MyHomePage> {
     if(buttonPressed != true) {
       return Container(
         alignment: Alignment.topCenter,
-        padding: const EdgeInsets.fromLTRB(0.0, 75.0, 0.0, 10.0),
+        padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 12.4, 0.0, 10.0),
         child: Image.asset( "images/logo.png" ,
           fit: BoxFit.cover,
-          width: 100,
+          width: screenWidth/ 4.3,
         ),
       );
     }
@@ -292,7 +292,7 @@ class _MyHomePageState extends State<MyHomePage> {
           return
             DecoratedBox(
                 decoration:  BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(35),
                   image: const DecorationImage(
                       image: AssetImage("images/calender.png"),
                       fit: BoxFit.cover
@@ -303,16 +303,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   child:
                   Column(
                     children: [
-                      const SizedBox(height: 10,),
+                      SizedBox(height: screenHeight/ 93.2),
                       Image.asset( "images/scrollThick.png" ,
                         fit: BoxFit.cover,
-                        width: 200,
+                        width: screenWidth/ 2.15,
                       ),
                       Center(
                         child:SingleChildScrollView(
                           controller: _scrollController,
                           reverse: true,
-                          padding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 10.0),
+                          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 46.5, 0.0, screenHeight/ 46.5),
                           scrollDirection: Axis.horizontal,
                           child: datesWidget(context),
                         ),
@@ -349,16 +349,19 @@ class _MyHomePageState extends State<MyHomePage> {
     else{
       return Container(
         alignment: Alignment.center,
-        color: Colors.red,
-        width: 75,
-        height: 20,
-        child: Text(
-          fortuneTextHolder,
-          style: GoogleFonts.carroisGothic(
-            textStyle: Theme.of(context).textTheme.headline4,
-            fontSize: (40 / lenOfFortune),
-            fontWeight: FontWeight.w700,
-            color: Colors.black,
+        padding: EdgeInsets.fromLTRB(0.0, screenHeight / 80, 0.0, screenWidth/43),
+        child: Container(
+          alignment: Alignment.center,
+          width: screenWidth / 4,
+          height: screenHeight / 46.6,
+          child: Text(
+            fortuneTextHolder,
+            style: GoogleFonts.carroisGothic(
+              textStyle: Theme.of(context).textTheme.headline4,
+              fontSize: 40 / lenOfFortune + 10,
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
+            ),
           ),
         ),
       );
@@ -586,7 +589,7 @@ class _MyHomePageState extends State<MyHomePage> {
         dynamic jj = jsonDecode(response);
         fortune = jj['data']['fortune'];
 
-        lenOfFortune = fortune.length as double;
+        lenOfFortune = fortune.length;
 
         // fortune to specific date
         DateTime now = DateTime.now();
