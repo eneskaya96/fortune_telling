@@ -33,6 +33,11 @@ class _MyHomePageState extends State<MyHomePage> {
   final ScrollController _scrollController = ScrollController();
   late VideoPlayerController controller;
 
+  static const double minExtent = 0.3;
+  static const double maxExtent = 0.8;
+
+  double initialExtent = minExtent;
+
   late Timer timer;
 
   late BannerAd _ad;
@@ -45,6 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int selectedItemIndex = 0;
   late String selectedItem;
+  bool showAllFortunes = false;
 
   String fortunesHolder = "";
   List<Widget> dateContainer =  <Widget>[];
@@ -174,19 +180,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 Stack(
                   children: [
                     Container(
-                      alignment: Alignment.center,
-                      //color: Colors.blue,
-                      child: Text("Hello !",
-                        style: generalBoldText(context),
-                      ),
-                    ),
-                    Container(
                       //color: Colors.red,
                       padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 46.5, 0.0, 10.0),
                       alignment: Alignment.bottomCenter,
                       child: Image.asset("images/hello_stick.png",
                         width: 180,
                         fit: BoxFit.cover,
+                      ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      //color: Colors.blue,
+                      child: Text("Hello !",
+                        style: generalBoldText(context),
                       ),
                     )
                   ],
@@ -269,51 +275,77 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget calenderMenuWidget() {
     if(buttonPressed != true) {
-      return DraggableScrollableSheet(
-        initialChildSize: 0.25,
-        maxChildSize: 0.85,
-        minChildSize: 0.25,
-        builder: (BuildContext context, ScrollController scrollController) {
-          return
-            DecoratedBox(
-                decoration:  BoxDecoration(
-                  borderRadius: BorderRadius.circular(35),
-                  image: const DecorationImage(
-                      image: AssetImage("images/calender.png"),
-                      fit: BoxFit.cover
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child:
-                  Column(
-                    children: [
-                      SizedBox(height: screenHeight/ 93.2),
-                      Image.asset( "images/scrollThick.png" ,
-                        fit: BoxFit.cover,
-                        width: screenWidth/ 2.15,
-                      ),
-                      Center(
-                        child:SingleChildScrollView(
-                          controller: _scrollController,
-                          reverse: true,
-                          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 46.5, 0.0, screenHeight/ 46.5),
-                          scrollDirection: Axis.horizontal,
-                          child: datesWidget(context),
-                        ),
-                      ),
-                      Text(fortunesHolder),
-                    ],
-                  ),
-                )
-            );
-        },
-      );
+      return  SizedBox.expand(
+          child: NotificationListener<DraggableScrollableNotification>(
+            onNotification: (DraggableScrollableNotification DSNotification)
+            {
+              if(DSNotification.extent>=0.50){
+
+                setState(() {
+                  showAllFortunes = true;
+                  readFortunesFromLocalStorage(selectedItem);
+                });
+              }
+              else if(DSNotification.extent<0.50){
+                setState(() {
+                  showAllFortunes = false;
+                  readFortunesFromLocalStorage(selectedItem);
+                });
+              }
+              return true;
+            },
+            child:
+            DraggableScrollableSheet(
+              minChildSize: minExtent,
+              maxChildSize: maxExtent,
+              initialChildSize: initialExtent,
+              snap: true,
+              builder: _draggableScrollableSheetBuilder,
+            ),
+          ));
     }
     else {
       return Container();
     }
   }
+
+
+  Widget _draggableScrollableSheetBuilder(BuildContext context,
+      ScrollController scrollController,) {
+    return DecoratedBox(
+        decoration:  BoxDecoration(
+          borderRadius: BorderRadius.circular(35),
+          image: const DecorationImage(
+              image: AssetImage("images/calender.png"),
+              fit: BoxFit.cover
+          ),
+        ),
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child:
+          Column(
+            children: [
+              SizedBox(height: screenHeight/ 93.2),
+              Image.asset( "images/scrollThick.png" ,
+                fit: BoxFit.cover,
+                width: screenWidth/ 2.15,
+              ),
+              Center(
+                child:SingleChildScrollView(
+                  controller: _scrollController,
+                  reverse: true,
+                  padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 46.5, 0.0, screenHeight/ 46.5),
+                  scrollDirection: Axis.horizontal,
+                  child: datesWidget(context),
+                ),
+              ),
+              Text(fortunesHolder),
+            ],
+          ),
+        )
+    );
+  }
+
 
   Widget backgroundImageWidget(){
     return GestureDetector(// Image tapped
@@ -544,11 +576,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void readFortunesFromLocalStorage(String date){
-    widget.storage.readFortunesForDate(date).then((value) {
-      setState(() {
-        fortunesHolder = value;
+    if(showAllFortunes){
+      widget.storage.readFortunesForDate(date).then((value) {
+        setState(() {
+          fortunesHolder = value;
+        });
       });
-    });
+    }
+    else {
+      fortunesHolder = "";
+    }
+
   }
 
   Future<void> getFortune() async {
