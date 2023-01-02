@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:fortune_telling/result_page.dart';
+import 'package:fortune_telling/styles.dart';
 import 'package:universal_io/io.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -151,12 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Container(
             alignment: Alignment.center,
             child: Text("Tap for fortune !",
-              style: GoogleFonts.carroisGothic(
-                textStyle: Theme.of(context).textTheme.headline4,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: const Color.fromRGBO(38, 38, 38, 1),
-              ),
+              style: generalBoldText(context),
             ),
           )
       );
@@ -182,12 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       alignment: Alignment.center,
                       //color: Colors.blue,
                       child: Text("Hello !",
-                        style: GoogleFonts.gothicA1(
-                          textStyle: Theme.of(context).textTheme.headline4,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w700,
-                          color: const Color.fromRGBO(38, 38, 38, 1),
-                        ),
+                        style: generalBoldText(context),
                       ),
                     ),
                     Container(
@@ -207,12 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       "what will happen in your life \n"
                       "today ...",
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.bodoniModa(
-                      textStyle: Theme.of(context).textTheme.headline4,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: const Color.fromRGBO(172, 172, 172, 1),
-                    ),
+                    style:generalThinTextStyle(context),
                   ),
                 ),
               ],
@@ -356,12 +341,7 @@ class _MyHomePageState extends State<MyHomePage> {
           height: screenHeight / 46.6,
           child: Text(
             fortuneTextHolder,
-            style: GoogleFonts.carroisGothic(
-              textStyle: Theme.of(context).textTheme.headline4,
-              fontSize: 40 / lenOfFortune + 10,
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
-            ),
+            style: endOfVideoTextStyle(context, lenOfFortune),
           ),
         ),
       );
@@ -407,9 +387,9 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 const Spacer(),
                 Text(item.split("-")[2],
-                    style: myStyle()),
+                    style: dateContainerStyle(context)),
                 Text(item.split("-")[1],
-                    style: myStyle()),
+                    style: dateContainerStyle(context)),
                 const Spacer(),
               ],
             ),
@@ -418,18 +398,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-
-  // styles
-  myStyle() {
-    return GoogleFonts.carroisGothic(
-        textStyle: Theme.of(context).textTheme.headline4,
-        fontSize: 10,
-        fontWeight: FontWeight.w700,
-        color: const Color.fromRGBO(249, 249, 250, 1),
-        backgroundColor: Colors.transparent
-    );
-  }
-
+  
   // inner functions
   void _timerJob(String formattedDate) {
 

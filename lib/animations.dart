@@ -6,7 +6,7 @@ PageTransition pageTransitionAnimation(StatefulWidget page, context){
   return PageTransition(
       type: PageTransitionType.rightToLeft,
       child: page ,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 300),
       inheritTheme: true,
       ctx: context);
 }

@@ -21,7 +21,7 @@ class _TransitionPageState extends State<TransitionPage> {
 
   late Timer timer;
 
-  var readedTime;
+  late DateTime _readTime;
   late String token;
   bool isFirstTime = false;
 
@@ -32,9 +32,11 @@ class _TransitionPageState extends State<TransitionPage> {
 
   @override
   void initState() {
+    super.initState();
+
     widget.storage.readTime().then((value) {
       setState(() {
-        readedTime = DateTime.parse(value);
+        _readTime = DateTime.parse(value);
       });
     });
 
@@ -46,14 +48,14 @@ class _TransitionPageState extends State<TransitionPage> {
 
     timer = Timer.periodic(const Duration(milliseconds: 200), (Timer t) =>
         setState(() {
-          _timer_job();
+          _timerJob();
         }));
   }
 
-  void _timer_job(){
+  void _timerJob(){
     if(timer.tick > 33) {
 
-      String remainingTime = widget.storage.getRemainigTime(readedTime);
+      String remainingTime = widget.storage.getRemainigTime(_readTime);
 
       // open tutorial page
       if (isFirstTime){
