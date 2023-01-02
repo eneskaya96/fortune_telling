@@ -33,7 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final ScrollController _scrollController = ScrollController();
   late VideoPlayerController controller;
 
-  static const double minExtent = 0.3;
+  static const double minExtent = 0.23;
   static const double maxExtent = 0.8;
 
   double initialExtent = minExtent;
