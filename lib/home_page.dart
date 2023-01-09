@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:fortune_telling/result_page.dart';
+
 import 'package:fortune_telling/styles.dart';
 import 'package:universal_io/io.dart';
 
@@ -12,6 +12,8 @@ import 'http_request.dart';
 import 'ad_helper.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui';
+
+import 'insta.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title, required this.storage}) : super(key: key);
@@ -45,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   bool tappable = true;
 
-  String fortune = "";
+  String fortune = "LOVE";
   String fortuneTextHolder = "";
 
   int selectedItemIndex = 0;
@@ -56,14 +58,40 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> dateContainer =  <Widget>[];
   final List<String> _dates = <String>[];
   bool created = false;
-  bool buttonPressed = false;
+
+  String _state = "beginningState";
 
   int lenOfFortune = 4;
+
+  late var _insta;
+
+  String boldMainText = "Hello !";
+  String softMainText = "You are very close to knowing \n"
+  "what will happen in your life \n"
+  "today ...";
+
+  late DateTime _readTime ;
+  late String remainingTime;
+
+  RewardedAd? _rewardedAd;
+
+  int numberOfFortune = 0; // TODO: ENES read from local file
+  late String yellowStickPath = "images/hello_stick.png";
+
 
   // built in functions
   @override
   void initState() {
     super.initState();
+    print(screenWidth);
+    print(screenHeight);
+    _insta = Insta(screenWidth, screenHeight, context);
+
+    widget.storage.readTime().then((value) {
+      setState(() {
+        _readTime = DateTime.parse(value);
+      });
+    });
 
     readDates();
 
@@ -79,6 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }));
 
     _loadBanner();
+    _loadRewardedAd();
     _loadVideoPlayer();
   }
 
@@ -99,11 +128,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   backgroundImageWidget(),
                   tapButtonOrVideoWidget(),
                   shownFortuneAtTheEndOfVideoWidget(),
+                  shareOnInstagram(),
                   logoWidget(),
                   mainPageBackgroundTextsWidget(),
                   tapHereTextWidget(),
                   calenderMenuWidget(),
-                  bannerAdWidget(),
+                  bannerAdWidget()
                 ]
             )
         ),
@@ -115,13 +145,14 @@ class _MyHomePageState extends State<MyHomePage> {
   void dispose() {
     if (Platform.isAndroid || Platform.isIOS) {
       _ad.dispose();
+      _rewardedAd?.dispose();
     }
     super.dispose();
   }
 
   // widget functions
   Widget bannerAdWidget() {
-    if (buttonPressed != true && isLoaded == true & (Platform.isAndroid || Platform.isIOS)) {
+    if (_state == "beginningState" && isLoaded == true & (Platform.isAndroid || Platform.isIOS)) {
       return
         Column(
             children: [
@@ -150,7 +181,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget tapHereTextWidget(){
-    if(buttonPressed != true){
+    if(_state == "beginningState"){
       return Container(
           padding: EdgeInsets.fromLTRB(0.0, screenHeight / 4.66, 0.0, screenWidth/43),
           child:
@@ -162,13 +193,39 @@ class _MyHomePageState extends State<MyHomePage> {
           )
       );
     }
+    else if(_state == "SecondChanceState" || _state == "DonotHaveChanceState"){
+      return Container(
+          alignment: Alignment.center,
+          padding: EdgeInsets.fromLTRB(0.0, screenHeight / 1.66, 0.0, screenWidth/43),
+          child: Column (
+            children: [
+              Container(
+                alignment: Alignment.center,
+                child: Text("Remaining time to \n "
+                    "the next day's fortune",
+                  textAlign: TextAlign.center,
+                  style: generalBoldText(context),
+                ),
+              ),
+              Container(
+                alignment: Alignment.center,
+                child: Text(remainingTime,
+                  textAlign: TextAlign.center,
+                  style: generalBoldText(context),
+                ),
+              )
+            ],
+          )
+
+      );
+    }
     else {
       return Container();
     }
   }
 
   Widget mainPageBackgroundTextsWidget(){
-    if(buttonPressed != true){
+    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DonotHaveChanceState"){
       return Container(
           padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 4.5, 0.0, 10.0),
           child:
@@ -183,7 +240,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       //color: Colors.red,
                       padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 46.5, 0.0, 10.0),
                       alignment: Alignment.bottomCenter,
-                      child: Image.asset("images/hello_stick.png",
+                      child: Image.asset(yellowStickPath,
                         width: 180,
                         fit: BoxFit.cover,
                       ),
@@ -191,7 +248,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     Container(
                       alignment: Alignment.center,
                       //color: Colors.blue,
-                      child: Text("Hello !",
+                      child: Text(boldMainText,
                         style: generalBoldText(context),
                       ),
                     )
@@ -199,9 +256,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 Container(
                   alignment: Alignment.center,
-                  child: Text("You are very close to knowing \n"
-                      "what will happen in your life \n"
-                      "today ...",
+                  child: Text(softMainText,
                     textAlign: TextAlign.center,
                     style:generalThinTextStyle(context),
                   ),
@@ -216,55 +271,139 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Widget tapButtonOrVideoWidget(){
-    if(buttonPressed == true){
-      return Container(
-        color: const Color.fromRGBO(249, 249, 250, 1.0),
-        alignment: Alignment.center,
+  void _showMaterialDialog() {
+    showDialog(
+        context: context,//this works
+        builder: (context) =>
+            Column(
+              children: [
+                const Spacer(),
+                Container(
+                  alignment: Alignment.center,
+                  child: AlertDialog(
+                    contentPadding: const EdgeInsets.fromLTRB(0.0, 0, 0.0, 0.0),
+                    alignment: Alignment.center,
+                    content: Container(
+                      color: Colors.deepPurpleAccent,
+                      width: screenWidth,
+                      height: screenHeight / 1.55,
+                      child: _insta.instaShare()
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                    onTap: () {
+                      _insta.share_on_instagram();
+                    },
+                    child:
+                    Container(
+                        alignment: Alignment.center,
+                        child: Image.asset("images/share_grey.png",
+                          width: screenWidth / 8,
+                          fit: BoxFit.contain,
+                        )
+                    )
+                ),
+                GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child:
+                    Container(
+                        alignment: Alignment.center,
+                        child: Image.asset("images/x.png",
+                          width: screenWidth / 8,
+                          fit: BoxFit.contain,
+                        )
+                    )
+                ),
+                const Spacer()
+              ],
+            )
+        );
+  }
+
+
+  Widget shareOnInstagram() {
+    if(_state == "EndOfVideoState") {
+      return  GestureDetector(
+        onTap: () async{
+          _showMaterialDialog();
+        },
         child: Container(
-          alignment: Alignment.center,
-          width: screenWidth,
-          height: screenWidth,
-          child: VideoPlayer(controller),
+            alignment: Alignment.center,
+            padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 3, 0.0, 10.0),
+            child: Container(
+                alignment: Alignment.center,
+                width: screenWidth / 15,
+                height: screenHeight / 26,
+                child: Image.asset("images/share_on_instagram_icon.png",
+                  fit: BoxFit.contain,
+                )
+            )
         ),
       );
     }
-    else {
-      return Container(
-        alignment: Alignment.center,
-        child: GestureDetector(
-          onTap: () {
-            if (tappable) {
-              tappable = false;
-              buttonPressed = true;
-              _rebuild();
-
-              getFortune();
-              DateTime time = DateTime.now();
-              widget.storage.writeTime(time.toIso8601String());
-              controller.play();
-            }
-          }, // Image tapped
-          child: Container(
-              alignment: Alignment.center,
-              child: Image.asset("images/button.gif",
-                width: screenWidth / 3,
-                fit: BoxFit.contain,
-              )
+    else if(_state == "SecondChanceState") {
+      return  GestureDetector(
+        onTap: () async{
+          _showMaterialDialog();
+        },
+        child: Container(
+          alignment: Alignment.topRight,
+          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 3, 20.0, 0.0),
+          child:Column(
+            children: [
+              GestureDetector(
+                onTap: () async{
+                  _showMaterialDialog();
+                },
+                child: Container(
+                    alignment: Alignment.center,
+                    width: screenWidth / 15,
+                    height: screenHeight / 26,
+                    child: Image.asset("images/share_on_instagram_icon.png",
+                      fit: BoxFit.contain,
+                    )
+                ),
+              ),
+              const Text("Share on \n "
+                  "Instagram",
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: screenHeight / 100),
+              GestureDetector(
+                onTap: () async{
+                  _rewardedAd?.show(
+                    onUserEarnedReward: (_, reward) {
+                      if (reward.amount >= 0){
+                        DateTime time = DateTime.now() ;
+                        // must be bigger than come_bach_after_hour of storage const variable
+                        const int come_bach_after_hour =  6;
+                        time = time.add(const Duration(minutes: - come_bach_after_hour));
+                        widget.storage.writeTime(time.toIso8601String());
+                        tappable = true;
+                        _state = "beginningState";
+                        _rebuild();
+                      }
+                    },
+                  );
+                },
+                child: Container(
+                    alignment: Alignment.center,
+                    width: screenWidth / 15,
+                    height: screenHeight / 26,
+                    child: Image.asset("images/replay_icon.png",
+                      fit: BoxFit.contain,
+                    )
+                ),
+              ),
+              const Text("For more \n "
+                  "Fortune",
+                textAlign: TextAlign.center,
+              ),
+            ],
           )
-        )
-      );
-    }
-  }
-
-  Widget logoWidget(){
-    if(buttonPressed != true) {
-      return Container(
-        alignment: Alignment.topCenter,
-        padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 12.4, 0.0, 10.0),
-        child: Image.asset( "images/logo.png" ,
-          fit: BoxFit.cover,
-          width: screenWidth/ 4.3,
         ),
       );
     }
@@ -273,8 +412,116 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Widget tapButtonOrVideoWidget(){
+    if(_state == "beginningState" || _state == "SecondChanceState") {
+      return Container(
+          alignment: Alignment.center,
+          child: GestureDetector(
+              onTap: () {
+                if (tappable) {
+                  tappable = false;
+                  _state = "videoShownState";
+                  // in the opening show current day fortune
+                  DateTime now = DateTime.now();
+                  var formatter = DateFormat('yyyy-MMM-dd');
+                  String formattedDate = formatter.format(now);
+                  readFortunesFromLocalStorage(formattedDate);
+                  _rebuild();
+
+                  getFortune();
+                  DateTime time = DateTime.now();
+                  widget.storage.writeTime(time.toIso8601String());
+                  controller.play();
+                }
+              }, // Image tapped
+              child: Container(
+                  alignment: Alignment.center,
+                  child: Image.asset("images/button.gif",
+                    width: screenWidth / 3,
+                    fit: BoxFit.contain,
+                  )
+              )
+          )
+      );
+    }
+    else if(_state == "videoShownState" || _state == "EndOfVideoState" ){
+      return
+        GestureDetector(
+            onTap: () {
+              if(_state == "EndOfVideoState"){
+                print("TAPPPPP");
+                if (numberOfFortune < 2){
+                  _state="SecondChanceState";
+                  boldMainText = "Today's fortune";
+                  softMainText = "Looks like a beautiful day awaits you ... \n "
+                      "Now, you can share this fortune with \n "
+                      "your friends or get another fortune";
+                  numberOfFortune = numberOfFortune + 1; // TODO read from local storage
+                }
+                else {
+                  _state="DonotHaveChanceState";
+                  yellowStickPath = "images/stick_grey.png";
+                  boldMainText = "Sorry !";
+                  softMainText = "You have reached the daily \n "
+                      "fortune limit. Try again for a \n "
+                      "new fortune after 24 hours";
+                }
+                _rebuild();
+              }
+            },
+            child: Container(
+            color: const Color.fromRGBO(249, 249, 250, 1.0),
+            alignment: Alignment.center,
+            child: Container(
+              alignment: Alignment.center,
+              width: screenWidth,
+              height: screenWidth,
+              child: VideoPlayer(controller),
+            ),
+          ),
+        );
+    }
+    else if(_state == "DonotHaveChanceState"){
+      return Container(
+          alignment: Alignment.center,
+          child: GestureDetector(
+              onTap: () {
+              }, // Image tapped
+              child: Container(
+                  alignment: Alignment.center,
+                  child: Image.asset("images/square_grey_animation.gif",
+                    width: screenWidth / 3,
+                    fit: BoxFit.contain,
+                  )
+              )
+          )
+      );
+    }
+    else {
+      return Container();
+    }
+
+  }
+
+  Widget logoWidget(){
+    if(_state == "beginningState" || _state == "DonotHaveChanceState") {
+      return
+        Container(
+          alignment: Alignment.topCenter,
+          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 12.4, 0.0, 0.0),
+          child: Image.asset( "images/logo.png" ,
+            fit: BoxFit.cover,
+            width: screenWidth/ 4.3,
+          ),
+        );
+    }
+    else {
+      return Container();
+    }
+  }
+
   Widget calenderMenuWidget() {
-    if(buttonPressed != true) {
+    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DonotHaveChanceState") {
       return  SizedBox.expand(
           child: NotificationListener<DraggableScrollableNotification>(
             onNotification: (DraggableScrollableNotification DSNotification)
@@ -308,7 +555,6 @@ class _MyHomePageState extends State<MyHomePage> {
       return Container();
     }
   }
-
 
   Widget _draggableScrollableSheetBuilder(BuildContext context,
       ScrollController scrollController,) {
@@ -345,7 +591,6 @@ class _MyHomePageState extends State<MyHomePage> {
         )
     );
   }
-
 
   Widget backgroundImageWidget(){
     return GestureDetector(// Image tapped
@@ -434,6 +679,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // inner functions
   void _timerJob(String formattedDate) {
 
+    print(_state);
     // Write time to
     if(controller.value.position >=
         controller.value.duration - const Duration(seconds: 9) &&
@@ -442,21 +688,23 @@ class _MyHomePageState extends State<MyHomePage> {
       fortuneTextHolder = fortune;
     }
     else if(controller.value.position >=
-        controller.value.duration - const Duration(seconds: 2) ) {
+        controller.value.duration - const Duration(seconds: 2)
+        && _state == "videoShownState") {
       fortuneTextHolder = '';
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context)
-        =>  ResultPage(title: "Result Page",
-            storage: widget.storage)),
-      );
-      timer.cancel();
+      print("Video END");
+      _state= "EndOfVideoState";
+      //timer.cancel();
     }
 
     // create date container and scroll
     if(created == false){
       reCreateDate(formattedDate);
       created = true;
+    }
+
+    remainingTime = widget.storage.getRemainigTime(_readTime);
+    if (remainingTime == "0:0:0") {
+      print("TimeFinished");
     }
   }
 
@@ -587,6 +835,7 @@ class _MyHomePageState extends State<MyHomePage> {
       fortunesHolder = "";
     }
 
+
   }
 
   Future<void> getFortune() async {
@@ -616,6 +865,33 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       });
     }
+  }
+
+  void _loadRewardedAd() {
+    RewardedAd.load(
+      adUnitId: AdHelper.rewardedAdUnitId,
+      request: AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              setState(() {
+                ad.dispose();
+                _rewardedAd = null;
+              });
+              _loadRewardedAd();
+            },
+          );
+
+          setState(() {
+            _rewardedAd = ad;
+          });
+        },
+        onAdFailedToLoad: (err) {
+          print('Failed to load a rewarded ad: ${err.message}');
+        },
+      ),
+    );
   }
 }
 

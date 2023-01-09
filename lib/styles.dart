@@ -23,9 +23,18 @@ TextStyle endOfVideoTextStyle(context, int lenOfFortune) {
 TextStyle generalBoldText(context) {
   return GoogleFonts.gothicA1(
     textStyle: Theme.of(context).textTheme.headline4,
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: FontWeight.w700,
     color: const Color.fromRGBO(38, 38, 38, 1),
+  );
+}
+
+TextStyle yellowBoldText(context) {
+  return GoogleFonts.gothicA1(
+    textStyle: Theme.of(context).textTheme.headline4,
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+    color: const Color.fromRGBO(250, 210, 64, 1),
   );
 }
 
