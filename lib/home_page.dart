@@ -16,9 +16,9 @@ import 'dart:ui';
 import 'insta.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title, required this.storage}) : super(key: key);
+  const MyHomePage({Key? key, required this.state, required this.storage}) : super(key: key);
 
-  final String title;
+  final String state;
   final CounterStorage storage;
 
   @override
@@ -45,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late BannerAd _ad;
   bool isLoaded = false;
 
-  bool tappable = true;
+  bool tappable = false;
 
   String fortune = "LOVE";
   String fortuneTextHolder = "";
@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<String> _dates = <String>[];
   bool created = false;
 
-  String _state = "beginningState";
+  late String _state ;
 
   int lenOfFortune = 4;
 
@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
   "today ...";
 
   late DateTime _readTime ;
-  late String remainingTime;
+  late String remainingTime = "X";
 
   RewardedAd? _rewardedAd;
 
@@ -83,6 +83,11 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    _state = widget.state;
+    if (_state == "beginningState") {
+      tappable = true;
+    }
+
     print(screenWidth);
     print(screenHeight);
     _insta = Insta(screenWidth, screenHeight, context);

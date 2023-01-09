@@ -84,7 +84,7 @@ class _ResultPageState extends State<ResultPage> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context)
-        =>  MyHomePage(title: "HOME",
+        =>  MyHomePage(state: "HOME",
             storage: widget.storage)),
       );
       timer.cancel();
@@ -211,7 +211,6 @@ class _ResultPageState extends State<ResultPage> {
                             print("qqqq");
                             return;
                           }
-
                           SocialShare.shareInstagramStory(
                             appId: "888268445701700",
                             imagePath: path,
@@ -223,7 +222,6 @@ class _ResultPageState extends State<ResultPage> {
                           });
                         },
                         child: Text('SHARE ON INSTAGRAM'),
-
                       ),
                     ),
                     Screenshot(

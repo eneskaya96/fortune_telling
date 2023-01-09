@@ -52,7 +52,7 @@ class _TutorialPage3State extends State<TutorialPage3> {
                         Navigator.push(
                           context,
                           pageTransitionAnimation(
-                              MyHomePage(title: "HOME", storage: widget.storage),
+                              MyHomePage(state: "beginningState", storage: widget.storage),
                               context
                           ),
                         );

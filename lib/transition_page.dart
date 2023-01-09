@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:fortune_telling/result_page.dart';
 import 'package:fortune_telling/tutorial_page_1.dart';
-import 'package:page_transition/page_transition.dart';
+import 'package:intl/intl.dart';
 
 import 'package:flutter/material.dart';
+import 'animations.dart';
 import 'file_operations.dart';
 import 'home_page.dart';
 
@@ -24,6 +24,8 @@ class _TransitionPageState extends State<TransitionPage> {
   late DateTime _readTime;
   late String token;
   bool isFirstTime = false;
+
+  int numberOfFortune = -1;
 
   @override
   void dispose() {
@@ -46,52 +48,61 @@ class _TransitionPageState extends State<TransitionPage> {
       });
     });
 
+    _getNumberOfFortunesForToday();
+
     timer = Timer.periodic(const Duration(milliseconds: 200), (Timer t) =>
         setState(() {
           _timerJob();
         }));
   }
 
+  void _getNumberOfFortunesForToday(){
+    String todayFortunes = "";
+    List<String> listOfFortune;
+    // read todays fortune number
+    DateTime now = DateTime.now();
+    var formatter = DateFormat('yyyy-MMM-dd');
+    String formattedDate = formatter.format(now);
+    widget.storage.readFortunesForDate(formattedDate).then((value) {
+      setState(() {
+        todayFortunes = value;
+        listOfFortune = todayFortunes.split("\n");
+        numberOfFortune = listOfFortune.length - 1;
+      });
+    });
+  }
+
   void _timerJob(){
     if(timer.tick > 33) {
 
       String remainingTime = widget.storage.getRemainigTime(_readTime);
-
+      String _state = "beginningState";
       // open tutorial page
       if (isFirstTime){
         Navigator.push(
-          context,
-          PageTransition(
-              type: PageTransitionType.rightToLeft,
-              child: TutorialPage1(title: "Tutorial 1",
-                storage: widget.storage,),
-              duration: const Duration(milliseconds: 300),
-              inheritTheme: true,
-              ctx: context),
-        );
-      }
-      else if (remainingTime == "0:0:0") {
-        Navigator.push(
-          context,
-          PageTransition(
-              type: PageTransitionType.rightToLeft,
-              child: MyHomePage(title: "HOME",
-                  storage: widget.storage),
-              duration: const Duration(milliseconds: 300),
-              inheritTheme: true,
-              ctx: context),
+            context,
+            pageTransitionAnimation(
+                TutorialPage1(title: '', storage: widget.storage,),
+                context
+            )
         );
       }
       else {
+        if(numberOfFortune > 4) {
+          _state = "DonotHaveChanceState";
+        }
+        else if (remainingTime == "0:0:0") {
+          _state = "beginningState";
+        }
+        else {
+          _state = "SecondChanceState";
+        }
         Navigator.push(
-          context,
-          PageTransition(
-              type: PageTransitionType.rightToLeft,
-              child: ResultPage(title: "RESULT",
-                  storage: widget.storage),
-              duration: const Duration(milliseconds: 300),
-              inheritTheme: true,
-              ctx: context),
+            context,
+            pageTransitionAnimation(
+                MyHomePage(state: _state, storage: widget.storage,),
+                context
+            )
         );
       }
       timer.cancel();
