@@ -552,10 +552,10 @@ class _MyHomePageState extends State<MyHomePage> {
       ScrollController scrollController,) {
     return DecoratedBox(
         decoration:  BoxDecoration(
-          borderRadius: BorderRadius.circular(35),
+          borderRadius: BorderRadius.circular(0),
           image: const DecorationImage(
               image: AssetImage("images/calender.png"),
-              fit: BoxFit.cover
+              fit: BoxFit.fill
           ),
         ),
         child: SingleChildScrollView(
