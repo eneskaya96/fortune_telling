@@ -92,7 +92,7 @@ class _TransitionPageState extends State<TransitionPage> {
           _state = "beginningState";
         }
         else if(numberOfFortune > 4) {
-          _state = "DonotHaveChanceState";
+          _state = "DoNotHaveChanceState";
         }
         else {
           _state = "SecondChanceState";
