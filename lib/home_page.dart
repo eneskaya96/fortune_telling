@@ -287,7 +287,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.deepPurpleAccent,
                       width: screenWidth,
                       height: screenHeight / 1.55,
-                      child: _instagram.instaShare()
+                      child: _instagram.instaShare(fortuneTextHolder)
                     ),
                   ),
                 ),

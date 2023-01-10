@@ -30,7 +30,7 @@ class Insta {
 
   ScreenshotController screenshotController = ScreenshotController();
 
-  Widget instaShare() {
+  Widget instaShare(String fortuneTextHolder) {
     return Screenshot(
       controller: screenshotController,
       child: Scaffold(
@@ -43,6 +43,7 @@ class Insta {
               logoWidget(),
               fortuneTellerTextWidget(),
               ellipseWidget(),
+              shownFortuneAtTheEndOfVideoWidget(fortuneTextHolder),
               todaysFortuneTextWidget(),
             ],
           )
@@ -82,6 +83,23 @@ class Insta {
     }
     );
   }
+
+  Widget shownFortuneAtTheEndOfVideoWidget(String fortuneTextHolder) {
+    return Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.fromLTRB(0.0, screenHeight / 80, 0.0, screenWidth/43),
+      child: Container(
+        alignment: Alignment.center,
+        width: screenWidth / 4,
+        height: screenHeight / 46.6,
+        child: Text(
+          fortuneTextHolder,
+          style: endOfVideoTextStyle(context, 8),
+        ),
+      ),
+    );
+  }
+
   Widget backgroundImageWidget(){
     return
       Container(
