@@ -63,40 +63,35 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int lenOfFortune = 4;
 
-  late var _insta;
+  // ignore: prefer_typing_uninitialized_variables
+  late var _instagram;
 
-  String boldMainText = "Hello !";
-  String softMainText = "You are very close to knowing \n"
-  "what will happen in your life \n"
-  "today ...";
+  String boldMainText = "";
+  String softMainText = "";
 
   late DateTime _readTime ;
   late String remainingTime = "X";
 
   RewardedAd? _rewardedAd;
 
-  int numberOfFortune = 0; // TODO: ENES read from local file
-  late String yellowStickPath = "images/hello_stick.png";
+  int numberOfFortune = 0;
+  late String yellowStickPath = "";
 
 
   // built in functions
   @override
   void initState() {
     super.initState();
-    _state = widget.state;
-    if (_state == "beginningState") {
-      tappable = true;
-    }
-
-    print(screenWidth);
-    print(screenHeight);
-    _insta = Insta(screenWidth, screenHeight, context);
-
     widget.storage.readTime().then((value) {
       setState(() {
         _readTime = DateTime.parse(value);
       });
     });
+
+    _state = widget.state;
+    _rebuild();
+
+    _instagram = Insta(screenWidth, screenHeight, context);
 
     readDates();
 
@@ -198,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
           )
       );
     }
-    else if(_state == "SecondChanceState" || _state == "DonotHaveChanceState"){
+    else if(_state == "SecondChanceState" || _state == "DoNotHaveChanceState"){
       return Container(
           alignment: Alignment.center,
           padding: EdgeInsets.fromLTRB(0.0, screenHeight / 1.66, 0.0, screenWidth/43),
@@ -230,7 +225,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget mainPageBackgroundTextsWidget(){
-    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DonotHaveChanceState"){
+    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DoNotHaveChanceState"){
       return Container(
           padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 4.5, 0.0, 10.0),
           child:
@@ -292,13 +287,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.deepPurpleAccent,
                       width: screenWidth,
                       height: screenHeight / 1.55,
-                      child: _insta.instaShare()
+                      child: _instagram.instaShare()
                     ),
                   ),
                 ),
                 GestureDetector(
                     onTap: () {
-                      _insta.share_on_instagram();
+                      _instagram.share_on_instagram();
                     },
                     child:
                     Container(
@@ -384,8 +379,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       if (reward.amount >= 0){
                         DateTime time = DateTime.now() ;
                         // must be bigger than come_bach_after_hour of storage const variable
-                        const int come_bach_after_hour =  6;
-                        time = time.add(const Duration(minutes: - come_bach_after_hour));
+                        const int comeBachAfterHour =  25;
+                        time = time.add(const Duration(minutes: - comeBachAfterHour));
                         widget.storage.writeTime(time.toIso8601String());
                         tappable = true;
                         _state = "beginningState";
@@ -426,6 +421,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (tappable) {
                   tappable = false;
                   _state = "videoShownState";
+                  _getNumberOfFortunesForToday();
                   // in the opening show current day fortune
                   DateTime now = DateTime.now();
                   var formatter = DateFormat('yyyy-MMM-dd');
@@ -436,6 +432,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   getFortune();
                   DateTime time = DateTime.now();
                   widget.storage.writeTime(time.toIso8601String());
+                  _readTime = time;
                   controller.play();
                 }
               }, // Image tapped
@@ -454,22 +451,11 @@ class _MyHomePageState extends State<MyHomePage> {
         GestureDetector(
             onTap: () {
               if(_state == "EndOfVideoState"){
-                print("TAPPPPP");
-                if (numberOfFortune < 2){
+                if (numberOfFortune < 5){
                   _state="SecondChanceState";
-                  boldMainText = "Today's fortune";
-                  softMainText = "Looks like a beautiful day awaits you ... \n "
-                      "Now, you can share this fortune with \n "
-                      "your friends or get another fortune";
-                  numberOfFortune = numberOfFortune + 1; // TODO read from local storage
                 }
                 else {
-                  _state="DonotHaveChanceState";
-                  yellowStickPath = "images/stick_grey.png";
-                  boldMainText = "Sorry !";
-                  softMainText = "You have reached the daily \n "
-                      "fortune limit. Try again for a \n "
-                      "new fortune after 24 hours";
+                  _state="DoNotHaveChanceState";
                 }
                 _rebuild();
               }
@@ -486,7 +472,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
     }
-    else if(_state == "DonotHaveChanceState"){
+    else if(_state == "DoNotHaveChanceState"){
       return Container(
           alignment: Alignment.center,
           child: GestureDetector(
@@ -509,7 +495,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget logoWidget(){
-    if(_state == "beginningState" || _state == "DonotHaveChanceState") {
+    if(_state == "beginningState" || _state == "DoNotHaveChanceState") {
       return
         Container(
           alignment: Alignment.topCenter,
@@ -526,19 +512,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget calenderMenuWidget() {
-    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DonotHaveChanceState") {
+    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DoNotHaveChanceState") {
       return  SizedBox.expand(
           child: NotificationListener<DraggableScrollableNotification>(
-            onNotification: (DraggableScrollableNotification DSNotification)
+            onNotification: (DraggableScrollableNotification dSNotification)
             {
-              if(DSNotification.extent>=0.50){
+              if(dSNotification.extent>=0.50){
 
                 setState(() {
                   showAllFortunes = true;
                   readFortunesFromLocalStorage(selectedItem);
                 });
               }
-              else if(DSNotification.extent<0.50){
+              else if(dSNotification.extent<0.50){
                 setState(() {
                   showAllFortunes = false;
                   readFortunesFromLocalStorage(selectedItem);
@@ -610,10 +596,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget shownFortuneAtTheEndOfVideoWidget() {
-    if(fortune == ""){
-      return  Container();
-    }
-    else{
+    if(_state == "videoShownState"  || _state == "SecondChanceState"  || _state == "EndOfVideoState"){
       return Container(
         alignment: Alignment.center,
         padding: EdgeInsets.fromLTRB(0.0, screenHeight / 80, 0.0, screenWidth/43),
@@ -627,6 +610,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       );
+    }
+    else{
+      return  Container();
     }
   }
 
@@ -684,21 +670,17 @@ class _MyHomePageState extends State<MyHomePage> {
   // inner functions
   void _timerJob(String formattedDate) {
 
-    print(_state);
     // Write time to
     if(controller.value.position >=
-        controller.value.duration - const Duration(seconds: 9) &&
-        controller.value.position <
-            controller.value.duration - const Duration(seconds: 2)) {
+        controller.value.duration - const Duration(seconds: 9)
+        && _state == "videoShownState") {
       fortuneTextHolder = fortune;
     }
-    else if(controller.value.position >=
-        controller.value.duration - const Duration(seconds: 2)
+
+    if(controller.value.position >=
+        controller.value.duration - const Duration(seconds: 6)
         && _state == "videoShownState") {
-      fortuneTextHolder = '';
-      print("Video END");
       _state= "EndOfVideoState";
-      //timer.cancel();
     }
 
     // create date container and scroll
@@ -708,8 +690,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     remainingTime = widget.storage.getRemainigTime(_readTime);
-    if (remainingTime == "0:0:0") {
-      print("TimeFinished");
+    //print(_state);
+    if (remainingTime == "0:0:0" && (_state == "SecondChanceState" || _state == "DoNotHaveChanceState")) {
+      tappable = true;
+      _state= "beginningState";
+      _rebuild();
     }
   }
 
@@ -749,6 +734,31 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _rebuild() {
+    if (_state == "beginningState") {
+      tappable = true;
+      yellowStickPath = "images/hello_stick.png";
+      boldMainText = "Hello !";
+      softMainText = "You are very close to knowing \n"
+          "what will happen in your life \n"
+          "today ...";
+      fortuneTextHolder = "";
+    }
+    else if (_state == "SecondChanceState") {
+      tappable = false;
+      yellowStickPath = "images/hello_stick.png";
+      boldMainText = "Today's fortune";
+      softMainText = "Looks like a beautiful day awaits you ... \n "
+          "Now, you can share this fortune with \n "
+          "your friends or get another fortune";
+    }
+    else if (_state == "DoNotHaveChanceState") {
+      yellowStickPath = "images/stick_grey.png";
+      boldMainText = "Sorry !";
+      softMainText = "You have reached the daily \n "
+          "fortune limit. Try again for a \n "
+          "new fortune after 24 hours";
+      fortuneTextHolder = "";
+    }
     setState(() {
     });
   }
@@ -875,7 +885,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _loadRewardedAd() {
     RewardedAd.load(
       adUnitId: AdHelper.rewardedAdUnitId,
-      request: AdRequest(),
+      request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
           ad.fullScreenContentCallback = FullScreenContentCallback(
@@ -897,6 +907,22 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
     );
+  }
+
+  void _getNumberOfFortunesForToday(){
+    String todayFortunes = "";
+    List<String> listOfFortune;
+    // read today's fortune number
+    DateTime now = DateTime.now();
+    var formatter = DateFormat('yyyy-MMM-dd');
+    String formattedDate = formatter.format(now);
+    widget.storage.readFortunesForDate(formattedDate).then((value) {
+      setState(() {
+        todayFortunes = value;
+        listOfFortune = todayFortunes.split("\n");
+        numberOfFortune = listOfFortune.length - 1;
+      });
+    });
   }
 }
 

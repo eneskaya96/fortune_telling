@@ -2,7 +2,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 class CounterStorage {
-  static const int  come_back_after_hour = 24;
+  static const int  come_back_after_hour = 5;
 
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
@@ -37,7 +37,7 @@ class CounterStorage {
       final contents = await file.readAsString();
       if (contents.isEmpty){
         DateTime time = DateTime.now();
-        time = time.add(const Duration(hours: - come_back_after_hour - 10));
+        time = time.add(const Duration(minutes: - come_back_after_hour - 10));
         writeTime(time.toIso8601String());
         return time.toIso8601String();
       }
@@ -45,7 +45,7 @@ class CounterStorage {
     } catch (e) {
       // If encountering an error, return 0
       DateTime time = DateTime.now();
-      time = time.add(const Duration(hours: - come_back_after_hour - 10));
+      time = time.add(const Duration(minutes: - come_back_after_hour - 10));
       writeTime(time.toIso8601String());
       return time.toIso8601String();
     }
@@ -131,7 +131,7 @@ class CounterStorage {
 
     var now = DateTime.now();
     var howMuchTimePassed = now.difference(readedTime);
-    var twentyFourHour = const Duration(hours: come_back_after_hour);
+    var twentyFourHour = const Duration(minutes: come_back_after_hour);
     var remainingTime = twentyFourHour - howMuchTimePassed ;
 
     String sDuration = "0:0:0";

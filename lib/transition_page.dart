@@ -88,11 +88,11 @@ class _TransitionPageState extends State<TransitionPage> {
         );
       }
       else {
-        if(numberOfFortune > 4) {
-          _state = "DonotHaveChanceState";
-        }
-        else if (remainingTime == "0:0:0") {
+        if (remainingTime == "0:0:0") {
           _state = "beginningState";
+        }
+        else if(numberOfFortune > 4) {
+          _state = "DonotHaveChanceState";
         }
         else {
           _state = "SecondChanceState";
