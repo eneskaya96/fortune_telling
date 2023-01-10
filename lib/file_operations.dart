@@ -134,11 +134,18 @@ class CounterStorage {
     var twentyFourHour = const Duration(minutes: come_back_after_hour);
     var remainingTime = twentyFourHour - howMuchTimePassed ;
 
-    String sDuration = "0:0:0";
+    String sDuration = "00:00:00";
     if (remainingTime > const Duration(seconds: 0)) {
-      sDuration = "${remainingTime.inHours}:${remainingTime.inMinutes.remainder(60)}:${(remainingTime.inSeconds.remainder(60))}";
+      sDuration = _printDuration(remainingTime);
     }
     return sDuration;
+  }
+
+  String _printDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
   }
 
 }

@@ -70,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String softMainText = "";
 
   late DateTime _readTime ;
-  late String remainingTime = "X";
+  late String remainingTime = "";
 
   RewardedAd? _rewardedAd;
 
@@ -691,7 +691,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     remainingTime = widget.storage.getRemainigTime(_readTime);
     //print(_state);
-    if (remainingTime == "0:0:0" && (_state == "SecondChanceState" || _state == "DoNotHaveChanceState")) {
+    if (remainingTime == "00:00:00" && (_state == "SecondChanceState" || _state == "DoNotHaveChanceState")) {
       tappable = true;
       _state= "beginningState";
       _rebuild();

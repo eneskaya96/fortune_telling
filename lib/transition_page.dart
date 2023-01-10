@@ -88,7 +88,7 @@ class _TransitionPageState extends State<TransitionPage> {
         );
       }
       else {
-        if (remainingTime == "0:0:0") {
+        if (remainingTime == "00:00:00") {
           _state = "beginningState";
         }
         else if(numberOfFortune > 4) {
