@@ -1,8 +1,11 @@
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import "dart:math";
+
 
 class CounterStorage {
-  static const int  come_back_after_hour = 5;
+  static const int  comeBackAfterHour = 24;
 
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
@@ -13,6 +16,14 @@ class CounterStorage {
   Future<File> get _localFileTime async {
     final path = await _localPath;
     return File('$path/time.txt');
+  }
+
+  Future<String> getRandomFortune() async {
+    final random = Random();
+    final String response = await rootBundle.loadString('assets/fortunes.txt');
+    List<String> listOfFortune = response.split("\n");
+    var element = listOfFortune[random.nextInt(listOfFortune.length)];
+    return element;
   }
 
   Future<File> get _localFileIsFirstTime async {
@@ -37,7 +48,7 @@ class CounterStorage {
       final contents = await file.readAsString();
       if (contents.isEmpty){
         DateTime time = DateTime.now();
-        time = time.add(const Duration(minutes: - come_back_after_hour - 10));
+        time = time.add(const Duration(hours: - comeBackAfterHour - 10));
         writeTime(time.toIso8601String());
         return time.toIso8601String();
       }
@@ -45,7 +56,7 @@ class CounterStorage {
     } catch (e) {
       // If encountering an error, return 0
       DateTime time = DateTime.now();
-      time = time.add(const Duration(minutes: - come_back_after_hour - 10));
+      time = time.add(const Duration(hours: - comeBackAfterHour - 10));
       writeTime(time.toIso8601String());
       return time.toIso8601String();
     }
@@ -87,12 +98,12 @@ class CounterStorage {
       // Read the file
       final contents = await file.readAsString();
       if (contents.isEmpty){
-        return "X";
+        return "";
       }
       return contents;
     } catch (e) {
       // If encountering an error
-      return "X";
+      return "";
     }
   }
 
@@ -117,21 +128,21 @@ class CounterStorage {
     final file = await _localFileIsFirstTime;
 
     // Write the file
-    return file.writeAsString('$isFirstTime');
+    return file.writeAsString(isFirstTime);
   }
 
   Future<File> writeTime(String time) async {
     final file = await _localFileTime;
 
     // Write the file
-    return file.writeAsString('$time');
+    return file.writeAsString(time);
   }
 
   String getRemainigTime(DateTime readedTime) {
 
     var now = DateTime.now();
     var howMuchTimePassed = now.difference(readedTime);
-    var twentyFourHour = const Duration(minutes: come_back_after_hour);
+    var twentyFourHour = const Duration(hours: comeBackAfterHour);
     var remainingTime = twentyFourHour - howMuchTimePassed ;
 
     String sDuration = "00:00:00";

@@ -11,14 +11,14 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:ui';
 
 
-class Insta {
+class InstagramShare {
   var screenWidth;
   var screenHeight;
   var context;
   late String date;
 
   // constructor
-  Insta(var screenWidth, var screenHeight, var context) {
+  InstagramShare(var screenWidth, var screenHeight, var context) {
     this.screenWidth = screenWidth;
     this.screenHeight = screenHeight;
     this.context = context;

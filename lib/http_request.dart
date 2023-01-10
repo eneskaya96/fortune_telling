@@ -31,7 +31,9 @@ Future<String> send_get_request(endPoint) async {
     return response.body;
   }
   else {
-    throw Exception('Failed HTTP REQUEST');
+    print("Exception");
+    return "";
+    //throw Exception('Failed HTTP REQUEST');
   }
 }
 

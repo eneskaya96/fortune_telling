@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:fortune_telling/styles.dart';
 import 'package:universal_io/io.dart';
 
@@ -13,7 +14,7 @@ import 'ad_helper.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui';
 
-import 'insta.dart';
+import 'instagram_share.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.state, required this.storage}) : super(key: key);
@@ -91,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _state = widget.state;
     _rebuild();
 
-    _instagram = Insta(screenWidth, screenHeight, context);
+    _instagram = InstagramShare(screenWidth, screenHeight, context);
 
     readDates();
 
@@ -380,7 +381,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         DateTime time = DateTime.now() ;
                         // must be bigger than come_bach_after_hour of storage const variable
                         const int comeBachAfterHour =  25;
-                        time = time.add(const Duration(minutes: - comeBachAfterHour));
+                        time = time.add(const Duration(hours: - comeBachAfterHour));
                         widget.storage.writeTime(time.toIso8601String());
                         tappable = true;
                         _state = "beginningState";
@@ -750,6 +751,7 @@ class _MyHomePageState extends State<MyHomePage> {
       softMainText = "Looks like a beautiful day awaits you ... \n "
           "Now, you can share this fortune with \n "
           "your friends or get another fortune";
+      _getLastFortune();
     }
     else if (_state == "DoNotHaveChanceState") {
       yellowStickPath = "images/stick_grey.png";
@@ -853,7 +855,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   }
 
-  Future<void> getFortune() async {
+  Future<void> getFortuneV1() async {
     String response = await get_fortune_();
     if (response.isNotEmpty) {
       setState(() {
@@ -882,6 +884,32 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Future<void> getFortune() async {
+    widget.storage.getRandomFortune().then((value) {
+      setState(() {
+        fortune = value;
+        lenOfFortune = fortune.length;
+
+        // fortune to specific date
+        DateTime now = DateTime.now();
+        var formatter = DateFormat('yyyy-MMM-dd');
+        String formattedDate = formatter.format(now);
+        widget.storage.writeFortuneForDate(formattedDate, fortune);
+
+        // add first date to dates table
+        widget.storage.readDates().then((value) {
+          setState(() {
+            // if any date is included, pass
+            if(value.length > 1){}
+            else {
+              widget.storage.writeDates(formattedDate);
+            }
+          });
+        });
+      });
+    });
+  }
+
   void _loadRewardedAd() {
     RewardedAd.load(
       adUnitId: AdHelper.rewardedAdUnitId,
@@ -903,10 +931,30 @@ class _MyHomePageState extends State<MyHomePage> {
           });
         },
         onAdFailedToLoad: (err) {
-          print('Failed to load a rewarded ad: ${err.message}');
+          if (kDebugMode) {
+            print('Failed to load a rewarded ad: ${err.message}');
+          }
         },
       ),
     );
+  }
+
+  void _getLastFortune(){
+    String todayFortunes = "";
+    List<String> listOfFortune;
+    // read today's fortune number
+    DateTime now = DateTime.now();
+    var formatter = DateFormat('yyyy-MMM-dd');
+    String formattedDate = formatter.format(now);
+    widget.storage.readFortunesForDate(formattedDate).then((value) {
+      setState(() {
+        todayFortunes = value;
+        listOfFortune = todayFortunes.split("\n");
+        if(listOfFortune.isNotEmpty){
+          fortuneTextHolder = listOfFortune[listOfFortune.length - 2];
+        }
+      });
+    });
   }
 
   void _getNumberOfFortunesForToday(){
