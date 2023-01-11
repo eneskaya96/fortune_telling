@@ -90,11 +90,9 @@ class InstagramShare {
       padding: EdgeInsets.fromLTRB(0.0, screenHeight / 80, 0.0, screenWidth/43),
       child: Container(
         alignment: Alignment.center,
-        width: screenWidth / 4,
-        height: screenHeight / 46.6,
         child: Text(
           fortuneTextHolder,
-          style: endOfVideoTextStyle(context, 8),
+          style: endOfVideoTextStyle(context),
         ),
       ),
     );
@@ -158,8 +156,8 @@ class InstagramShare {
               SizedBox(width: screenWidth/43),
               Container(
                 alignment: Alignment.center,
-                child: Text(date, // TODO:ENES change
-                    style: generalBoldText(context)
+                child: Text(date,
+                    style: generalBoldText(context, 20.0)
                 ),
               ),
               const Spacer()
@@ -189,7 +187,7 @@ class InstagramShare {
       padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 9.1, 0.0, 0.0),
       child: Text("fortune \n teller",
         textAlign: TextAlign.center,
-        style: generalBoldText(context),
+        style: generalBoldText(context, 20.0),
       ),
     );
   }

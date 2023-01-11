@@ -11,20 +11,19 @@ TextStyle dateContainerStyle(context) {
   );
 }
 
-TextStyle endOfVideoTextStyle(context, int lenOfFortune) {
+TextStyle endOfVideoTextStyle(context,) {
   return GoogleFonts.carroisGothic(
     textStyle: Theme.of(context).textTheme.headline4,
-    fontSize: 40 / lenOfFortune + 10,
+    fontSize: 25 ,
     fontWeight: FontWeight.w700,
-    color: Colors.black,
+    color: Colors.white,
   );
 }
 
-TextStyle generalBoldText(context) {
+TextStyle generalBoldText(context, fontSize) {
   return GoogleFonts.gothicA1(
     textStyle: Theme.of(context).textTheme.headline4,
-    fontSize: 20,
-    fontWeight: FontWeight.w700,
+    fontSize: fontSize,
     color: const Color.fromRGBO(38, 38, 38, 1),
   );
 }

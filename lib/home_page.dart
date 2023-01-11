@@ -153,7 +153,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // widget functions
   Widget bannerAdWidget() {
-    if (_state == "beginningState" && isLoaded == true & (Platform.isAndroid || Platform.isIOS)) {
+    if ((_state == "beginningState" ||
+        _state == "SecondChanceState" ||
+        _state == "DoNotHaveChanceState" ) && isLoaded == true & (Platform.isAndroid || Platform.isIOS)) {
       return
         Column(
             children: [
@@ -189,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Container(
             alignment: Alignment.center,
             child: Text("Tap for fortune !",
-              style: generalBoldText(context),
+              style: generalBoldText(context, 20.0),
             ),
           )
       );
@@ -205,14 +207,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Text("Remaining time to \n "
                     "the next day's fortune",
                   textAlign: TextAlign.center,
-                  style: generalBoldText(context),
+                  style: generalBoldText(context, 20.0),
                 ),
               ),
               Container(
                 alignment: Alignment.center,
                 child: Text(remainingTime,
                   textAlign: TextAlign.center,
-                  style: generalBoldText(context),
+                  style: generalBoldText(context, 20.0),
                 ),
               )
             ],
@@ -238,25 +240,30 @@ class _MyHomePageState extends State<MyHomePage> {
                 Stack(
                   children: [
                     Container(
-                      //color: Colors.red,
-                      padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 46.5, 0.0, 10.0),
+                      //color: Colors.blue,
+                      padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 7.0),// 15
                       alignment: Alignment.bottomCenter,
+                      height: screenHeight / 46.6 * 2,
                       child: Image.asset(yellowStickPath,
-                        width: 180,
+                        width:  screenWidth / 2.00,
+                        height: screenHeight / 186.4, // padding + this should be equal to font size = 5
                         fit: BoxFit.cover,
                       ),
                     ),
                     Container(
-                      alignment: Alignment.center,
-                      //color: Colors.blue,
+                      //color: Colors.red,
+                      alignment: Alignment.bottomCenter,
+                      height: screenHeight / 46.6 * 2, // should  be equal to text font size = 20
+                      //width: 200,
                       child: Text(boldMainText,
-                        style: generalBoldText(context),
+                        style: generalBoldText(context, 25.0),
                       ),
                     )
                   ],
                 ),
                 Container(
                   alignment: Alignment.center,
+                  width: screenWidth / 2.00,
                   child: Text(softMainText,
                     textAlign: TextAlign.center,
                     style:generalThinTextStyle(context),
@@ -440,7 +447,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Container(
                   alignment: Alignment.center,
                   child: Image.asset("images/button.gif",
-                    width: screenWidth / 3,
+                    width: screenWidth / 2.6,
                     fit: BoxFit.contain,
                   )
               )
@@ -496,7 +503,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget logoWidget(){
-    if(_state == "beginningState" || _state == "DoNotHaveChanceState") {
+    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DoNotHaveChanceState") {
       return
         Container(
           alignment: Alignment.topCenter,
@@ -603,11 +610,9 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: EdgeInsets.fromLTRB(0.0, screenHeight / 80, 0.0, screenWidth/43),
         child: Container(
           alignment: Alignment.center,
-          width: screenWidth / 4,
-          height: screenHeight / 46.6,
           child: Text(
             fortuneTextHolder,
-            style: endOfVideoTextStyle(context, lenOfFortune),
+            style: endOfVideoTextStyle(context),
           ),
         ),
       );
@@ -748,16 +753,16 @@ class _MyHomePageState extends State<MyHomePage> {
       tappable = false;
       yellowStickPath = "images/hello_stick.png";
       boldMainText = "Today's fortune";
-      softMainText = "Looks like a beautiful day awaits you ... \n "
-          "Now, you can share this fortune with \n "
+      softMainText = "Looks like a beautiful day awaits you ...  "
+          "Now, you can share this fortune with "
           "your friends or get another fortune";
       _getLastFortune();
     }
     else if (_state == "DoNotHaveChanceState") {
       yellowStickPath = "images/stick_grey.png";
       boldMainText = "Sorry !";
-      softMainText = "You have reached the daily \n "
-          "fortune limit. Try again for a \n "
+      softMainText = "You have reached the daily "
+          "fortune limit. Try again for a "
           "new fortune after 24 hours";
       fortuneTextHolder = "";
     }
