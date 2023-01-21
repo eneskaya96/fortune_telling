@@ -37,7 +37,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late VideoPlayerController controller;
 
   static const double minExtent = 0.23;
-  static const double maxExtent = 0.8;
+  static const double maxExtent = 0.84;
 
   double initialExtent = minExtent;
 
@@ -58,6 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String fortunesHolder = "";
   List<Widget> dateContainer =  <Widget>[];
   final List<String> _dates = <String>[];
+  final List<String> todays_fortune = <String>[];
   bool created = false;
 
   late String _state ;
@@ -186,13 +187,17 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget tapHereTextWidget(){
     if(_state == "beginningState"){
       return Container(
-          padding: EdgeInsets.fromLTRB(0.0, screenHeight / 4.66, 0.0, screenWidth/43),
+          alignment: Alignment.center,
+          padding: EdgeInsets.fromLTRB(0.0, screenHeight / 4.0, 0.0, screenWidth/43),
           child:
           Container(
-            alignment: Alignment.center,
-            child: Text("Tap for fortune !",
-              style: generalBoldText(context, 20.0),
-            ),
+            width: screenWidth / 3.5,
+            child: FittedBox(
+              fit: BoxFit.fitWidth,
+              child: Text("Tap for fortune !",
+                style: generalBoldText(context, 20.0),
+              ),
+            )
           )
       );
     }
@@ -203,19 +208,30 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column (
             children: [
               Container(
-                alignment: Alignment.center,
-                child: Text("Remaining time to \n "
-                    "the next day's fortune",
-                  textAlign: TextAlign.center,
-                  style: generalBoldText(context, 20.0),
-                ),
+                  width: screenWidth / 2.5,
+                  alignment: Alignment.center,
+                  child: FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Text("Remaining time to \n "
+                      "the next day's fortune",
+                    textAlign: TextAlign.center,
+                    style: remainingTimeText(context),
+                  ),
+                )
+              ),
+              SizedBox(
+                height: screenHeight/ 250,
               ),
               Container(
                 alignment: Alignment.center,
-                child: Text(remainingTime,
-                  textAlign: TextAlign.center,
-                  style: generalBoldText(context, 20.0),
-                ),
+                width: screenWidth/4,
+                child: FittedBox(
+                  fit: BoxFit.fitWidth,
+                  child: Text(remainingTime,
+                    textAlign: TextAlign.center,
+                    style: remainingTimeT(context),
+                  ),
+                )
               )
             ],
           )
@@ -230,7 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget mainPageBackgroundTextsWidget(){
     if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DoNotHaveChanceState"){
       return Container(
-          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 4.5, 0.0, 10.0),
+          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 5.4, 0.0, 10.0),
           child:
           Container(
             alignment: Alignment.center,
@@ -241,12 +257,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     Container(
                       //color: Colors.blue,
-                      padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 7.0),// 15
+                      padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, screenHeight / 155.0),// 15
                       alignment: Alignment.bottomCenter,
                       height: screenHeight / 46.6 * 2,
                       child: Image.asset(yellowStickPath,
-                        width:  screenWidth / 2.00,
-                        height: screenHeight / 186.4, // padding + this should be equal to font size = 5
+                        width:  screenWidth / 1.60,
+                        height: screenHeight / 146.4, // padding + this should be equal to font size = 5
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -255,19 +271,29 @@ class _MyHomePageState extends State<MyHomePage> {
                       alignment: Alignment.bottomCenter,
                       height: screenHeight / 46.6 * 2, // should  be equal to text font size = 20
                       //width: 200,
-                      child: Text(boldMainText,
-                        style: generalBoldText(context, 25.0),
-                      ),
+                      child: FittedBox(
+                        fit: BoxFit.fitWidth,
+                        child: Text(boldMainText,
+                          style: generalBoldText(context, 35.0),
+                        ),
+                      )
+
                     )
                   ],
                 ),
+                SizedBox(
+                  height: screenHeight / 100.4,
+                ),
                 Container(
                   alignment: Alignment.center,
-                  width: screenWidth / 2.00,
-                  child: Text(softMainText,
-                    textAlign: TextAlign.center,
-                    style:generalThinTextStyle(context),
-                  ),
+                  width: screenWidth / 1.60,
+                  child: FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child:  Text(softMainText,
+                      textAlign: TextAlign.center,
+                      style:generalThinTextStyle(context, screenWidth / 23.88),
+                    ),
+                  )
                 ),
               ],
             ),
@@ -340,7 +366,7 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         child: Container(
             alignment: Alignment.center,
-            padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 3, 0.0, 10.0),
+            padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 3.3, 0.0, 10.0),
             child: Container(
                 alignment: Alignment.center,
                 width: screenWidth / 15,
@@ -359,7 +385,7 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         child: Container(
           alignment: Alignment.topRight,
-          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 3, 20.0, 0.0),
+          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 2.37, screenWidth/ 21.5, 0.0),
           child:Column(
             children: [
               GestureDetector(
@@ -375,9 +401,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     )
                 ),
               ),
-              const Text("Share on \n "
-                  "Instagram",
-                textAlign: TextAlign.center,
+              Container(
+                width: screenWidth / 7,
+                alignment: Alignment.center,
+                child: FittedBox(
+                  fit: BoxFit.fitWidth,
+                  child: Text(" Share on\n "
+                      "Instagram",
+                    textAlign: TextAlign.center,
+                    style: shareIconText(context),
+                  )
+                ),
               ),
               SizedBox(height: screenHeight / 100),
               GestureDetector(
@@ -406,9 +440,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     )
                 ),
               ),
-              const Text("For more \n "
-                  "Fortune",
-                textAlign: TextAlign.center,
+              Container(
+                width: screenWidth / 8,
+                alignment: Alignment.center,
+                child: FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Text("For more \n"
+                        "Fortune",
+                      textAlign: TextAlign.center,
+                      style: shareIconText(context),
+                    )
+                ),
               ),
             ],
           )
@@ -446,8 +488,9 @@ class _MyHomePageState extends State<MyHomePage> {
               }, // Image tapped
               child: Container(
                   alignment: Alignment.center,
+                  padding: EdgeInsets.fromLTRB(screenWidth/ 60, screenHeight/ 150, 0.0, 0.0),
                   child: Image.asset("images/button.gif",
-                    width: screenWidth / 2.6,
+                    width: screenWidth / 2,
                     fit: BoxFit.contain,
                   )
               )
@@ -469,6 +512,7 @@ class _MyHomePageState extends State<MyHomePage> {
               }
             },
             child: Container(
+            padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, screenHeight/ 35),
             color: const Color.fromRGBO(249, 249, 250, 1.0),
             alignment: Alignment.center,
             child: Container(
@@ -489,7 +533,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Container(
                   alignment: Alignment.center,
                   child: Image.asset("images/square_grey_animation.gif",
-                    width: screenWidth / 3,
+                    width: screenWidth / 2,
                     fit: BoxFit.contain,
                   )
               )
@@ -507,7 +551,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return
         Container(
           alignment: Alignment.topCenter,
-          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 12.4, 0.0, 0.0),
+          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 15.4, 0.0, 0.0),
           child: Image.asset( "images/logo.png" ,
             fit: BoxFit.cover,
             width: screenWidth/ 4.3,
@@ -584,7 +628,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: datesWidget(context),
                 ),
               ),
-              Text(fortunesHolder),
+              SizedBox(height: screenHeight / 12,),
+              Container(
+                color: Colors.red,
+                alignment: Alignment.center,
+                child:
+                Text(fortunesHolder,
+                  textAlign: TextAlign.center,
+                    style:generalBoldTextWithFont(context, screenWidth / 20.0),),
+              )
+
             ],
           ),
         )
@@ -604,14 +657,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget shownFortuneAtTheEndOfVideoWidget() {
-    if(_state == "videoShownState"  || _state == "SecondChanceState"  || _state == "EndOfVideoState"){
+    if(_state == "beginningState"  || _state == "videoShownState"  || _state == "SecondChanceState"  || _state == "EndOfVideoState"){
       return Container(
         alignment: Alignment.center,
-        padding: EdgeInsets.fromLTRB(0.0, screenHeight / 80, 0.0, screenWidth/43),
         child: Container(
           alignment: Alignment.center,
           child: Text(
             fortuneTextHolder,
+            textAlign: TextAlign.center,
             style: endOfVideoTextStyle(context),
           ),
         ),
@@ -753,16 +806,16 @@ class _MyHomePageState extends State<MyHomePage> {
       tappable = false;
       yellowStickPath = "images/hello_stick.png";
       boldMainText = "Today's fortune";
-      softMainText = "Looks like a beautiful day awaits you ...  "
-          "Now, you can share this fortune with "
+      softMainText = "What an amazing day awaits you !\n"
+          "Now, you can share this fortune with \n"
           "your friends or get another fortune";
       _getLastFortune();
     }
     else if (_state == "DoNotHaveChanceState") {
       yellowStickPath = "images/stick_grey.png";
       boldMainText = "Sorry !";
-      softMainText = "You have reached the daily "
-          "fortune limit. Try again for a "
+      softMainText = "You have reached the daily \n"
+          "fortune limit. Try again for a \n"
           "new fortune after 24 hours";
       fortuneTextHolder = "";
     }
@@ -856,8 +909,6 @@ class _MyHomePageState extends State<MyHomePage> {
     else {
       fortunesHolder = "";
     }
-
-
   }
 
   Future<void> getFortuneV1() async {
