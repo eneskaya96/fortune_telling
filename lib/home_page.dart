@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String softMainText = "";
 
   late DateTime _readTime ;
-  late String remainingTime = "";
+  late String remainingTime = "0";
 
   RewardedAd? _rewardedAd;
 
@@ -604,19 +604,20 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget allFortunesWidget() {
     return Column(
       children: [
-        for (var t in allFortunes)
+        for (int i = 0; i < allFortunes.length ; i++)
           Column(
             children: [
               SizedBox(height: screenHeight / 50),
-              Text(t,
+              Text(allFortunes[i],
               style: generalBoldTextWithFont(context, 20.0),),
               SizedBox(height: screenHeight / 50),
-              Image.asset( "images/ellipse_yellow.png" ,
-                fit: BoxFit.cover,
-                width: screenWidth/ 50,
-              ),
+              if(i != allFortunes.length - 1)
+                Image.asset( "images/ellipse_yellow.png" ,
+                  fit: BoxFit.cover,
+                  width: screenWidth/ 50,
+                ),
             ],
-          ),
+        ),
       ],
     );
   }
