@@ -118,6 +118,7 @@ class InstagramShare {
   Widget todaysFortuneTextWidget(){
     return Container(
       alignment: Alignment.center,
+      padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 20.20, 0.0, 0.0),
       child: Column(
         children: [
           Stack(
@@ -157,7 +158,7 @@ class InstagramShare {
               Container(
                 alignment: Alignment.center,
                 child: Text(date,
-                    style: generalBoldText(context, 20.0)
+                    style: remainingTimeWithFontSize(context, 20.0)
                 ),
               ),
               const Spacer()
@@ -187,7 +188,7 @@ class InstagramShare {
       padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 9.1, 0.0, 0.0),
       child: Text("fortune \n teller",
         textAlign: TextAlign.center,
-        style: generalBoldText(context, 20.0),
+        style: generalBoldTextWithFont(context, 20.0),
       ),
     );
   }

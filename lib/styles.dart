@@ -27,6 +27,15 @@ TextStyle remainingTimeT(context) {
   );
 }
 
+TextStyle remainingTimeWithFontSize(context, fontSize) {
+  return GoogleFonts.bodoniModa(
+    textStyle: Theme.of(context).textTheme.headlineLarge,
+    fontSize: fontSize,
+    fontWeight: FontWeight.w900,
+    color: const Color.fromRGBO(172, 172, 172, 1),
+  );
+}
+
 TextStyle generalBoldTextWithFont(context, fontSize) {
   return GoogleFonts.didactGothic(
     textStyle: Theme.of(context).textTheme.headlineLarge,
