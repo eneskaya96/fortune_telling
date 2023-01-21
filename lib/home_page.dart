@@ -58,8 +58,9 @@ class _MyHomePageState extends State<MyHomePage> {
   String fortunesHolder = "";
   List<Widget> dateContainer =  <Widget>[];
   final List<String> _dates = <String>[];
-  final List<String> todays_fortune = <String>[];
   bool created = false;
+
+  final List<String> allFortunes = <String>[];
 
   late String _state ;
 
@@ -111,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _loadBanner();
     _loadRewardedAd();
     _loadVideoPlayer();
+
   }
 
   Future<bool> _onWillPop() async {
@@ -599,6 +601,26 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Widget allFortunesWidget() {
+    return Column(
+      children: [
+        for (var t in allFortunes)
+          Column(
+            children: [
+              SizedBox(height: screenHeight / 50),
+              Text(t,
+              style: generalBoldTextWithFont(context, 20.0),),
+              SizedBox(height: screenHeight / 50),
+              Image.asset( "images/ellipse_yellow.png" ,
+                fit: BoxFit.cover,
+                width: screenWidth/ 50,
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+
   Widget _draggableScrollableSheetBuilder(BuildContext context,
       ScrollController scrollController,) {
     return DecoratedBox(
@@ -630,12 +652,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               SizedBox(height: screenHeight / 12,),
               Container(
-                color: Colors.red,
                 alignment: Alignment.center,
-                child:
-                Text(fortunesHolder,
-                  textAlign: TextAlign.center,
-                    style:generalBoldTextWithFont(context, screenWidth / 20.0),),
+                child: allFortunesWidget()
               )
 
             ],
@@ -902,7 +920,14 @@ class _MyHomePageState extends State<MyHomePage> {
     if(showAllFortunes){
       widget.storage.readFortunesForDate(date).then((value) {
         setState(() {
-          fortunesHolder = value;
+          allFortunes.clear();
+          List<String> lFortune = value.split("\n");
+          for( var l in lFortune){
+            if(l != ""){
+              allFortunes.add(l);
+            }
+          }
+          print(allFortunes);
         });
       });
     }
@@ -910,6 +935,7 @@ class _MyHomePageState extends State<MyHomePage> {
       fortunesHolder = "";
     }
   }
+
 
   Future<void> getFortuneV1() async {
     String response = await get_fortune_();
@@ -1015,6 +1041,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _getNumberOfFortunesForToday(){
     String todayFortunes = "";
+
     List<String> listOfFortune;
     // read today's fortune number
     DateTime now = DateTime.now();
