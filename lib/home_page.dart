@@ -322,7 +322,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     content: Container(
                       color: Colors.deepPurpleAccent,
                       width: screenWidth,
-                      height: screenHeight / 1.55,
+                      height: screenHeight / 1.4,
                       child: _instagram.instaShare(fortuneTextHolder)
                     ),
                   ),
@@ -368,7 +368,7 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         child: Container(
             alignment: Alignment.center,
-            padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 3.3, 0.0, 10.0),
+            padding: EdgeInsets.fromLTRB(0.0, screenWidth/ 1.4, 0.0, 10.0),
             child: Container(
                 alignment: Alignment.center,
                 width: screenWidth / 15,
@@ -504,7 +504,7 @@ class _MyHomePageState extends State<MyHomePage> {
         GestureDetector(
             onTap: () {
               if(_state == "EndOfVideoState"){
-                if (numberOfFortune < 5){
+                if (numberOfFortune < 4){
                   _state="SecondChanceState";
                 }
                 else {
@@ -517,12 +517,19 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, screenHeight/ 35),
             color: const Color.fromRGBO(249, 249, 250, 1.0),
             alignment: Alignment.center,
-            child: Container(
-              alignment: Alignment.center,
-              width: screenWidth,
-              height: screenWidth,
-              child: VideoPlayer(controller),
-            ),
+            child:
+            Transform.scale(
+                alignment: Alignment.center,
+                scale: 1.08,
+                child:Container(
+                  alignment: Alignment.center,
+                  width: screenWidth ,
+                  height: screenWidth,
+                  child: VideoPlayer(controller),
+                ),
+            )
+
+
           ),
         );
     }

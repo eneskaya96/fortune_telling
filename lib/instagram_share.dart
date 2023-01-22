@@ -124,19 +124,29 @@ class InstagramShare {
           Stack(
             children: [
               Container(
-                padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 2.20, 0.0, 0.0),
-                alignment: Alignment.bottomCenter,
+                alignment: Alignment.center,
+                padding: EdgeInsets.fromLTRB(0.0, (screenHeight/ 2.28 + screenHeight/70.5)  , 0.0, 0.0),
                 child: Image.asset("images/yellow_rectangle.png",
-                  width: screenWidth / 1.80,
-                  fit: BoxFit.cover,
-                ),
+                    width:  screenWidth / 1.80,
+                    height: screenHeight / 146.4,
+                    fit: BoxFit.cover,
+                  ),
               ),
               Container(
-                alignment: Alignment.center,
-                padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 2.28 , 0.0, 10.0),
-                child: Text("TODAY'S FORTUNE",
-                  style: yellowBoldText(context),
-                ),
+                  alignment: Alignment.center,
+                child: Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 2.28 , 0.0, 0.0),
+                    width: screenWidth / 2,
+                    child: FittedBox(
+                      fit: BoxFit.fitWidth,
+                      child: Text("TODAY'S FORTUNE",
+                        style: yellowBoldText(context),
+                      ),
+                    )
+
+
+                )
               )
             ],
           ),
