@@ -925,23 +925,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void readFortunesFromLocalStorage(String date){
-    if(showAllFortunes){
-      widget.storage.readFortunesForDate(date).then((value) {
-        setState(() {
-          allFortunes.clear();
-          List<String> lFortune = value.split("\n");
-          for( var l in lFortune){
-            if(l != ""){
-              allFortunes.add(l);
-            }
+    print("read");
+    widget.storage.readFortunesForDate(date).then((value) {
+      setState(() {
+        allFortunes.clear();
+        List<String> lFortune = value.split("\n");
+        for( var l in lFortune){
+          if(l != ""){
+            allFortunes.add(l);
           }
-          print(allFortunes);
-        });
+        }
       });
-    }
-    else {
-      fortunesHolder = "";
-    }
+    });
   }
 
 
@@ -977,25 +972,38 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> getFortune() async {
     widget.storage.getRandomFortune().then((value) {
       setState(() {
-        fortune = value;
-        lenOfFortune = fortune.length;
 
-        // fortune to specific date
-        DateTime now = DateTime.now();
-        var formatter = DateFormat('yyyy-MMM-dd');
-        String formattedDate = formatter.format(now);
-        widget.storage.writeFortuneForDate(formattedDate, fortune);
+        print(value);
+        print(allFortunes);
+        // if new fortune exists in today's fortune retry
+        if (allFortunes.contains(value)){
+          print("retry");
+          getFortune();
+        }
+        else {
+          fortune = value;
+          lenOfFortune = fortune.length;
 
-        // add first date to dates table
-        widget.storage.readDates().then((value) {
-          setState(() {
-            // if any date is included, pass
-            if(value.length > 1){}
-            else {
-              widget.storage.writeDates(formattedDate);
-            }
+          // fortune to specific date
+          DateTime now = DateTime.now();
+          var formatter = DateFormat('yyyy-MMM-dd');
+          String formattedDate = formatter.format(now);
+          widget.storage.writeFortuneForDate(formattedDate, fortune);
+
+          // add first date to dates table
+          widget.storage.readDates().then((value) {
+            setState(() {
+              // if any date is included, pass
+              if(value.length > 1){}
+              else {
+                widget.storage.writeDates(formattedDate);
+              }
+            });
           });
-        });
+        }
+
+
+
       });
     });
   }
