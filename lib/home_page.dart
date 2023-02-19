@@ -8,11 +8,14 @@ import 'package:universal_io/io.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:video_player/video_player.dart';
+import 'background_image_widgets.dart';
+import 'calenderWidgets.dart';
+import 'enums.dart';
 import 'file_operations.dart';
-import 'http_request.dart';
-import 'ad_helper.dart';
+import 'fortune_operations.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui';
+import 'ad_helper.dart';
 
 import 'instagram_share.dart';
 
@@ -29,17 +32,15 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+
   // Screen size in density independent pixels
   var screenWidth = (window.physicalSize.shortestSide / window.devicePixelRatio);
   var screenHeight = (window.physicalSize.longestSide / window.devicePixelRatio);
 
-  final ScrollController _scrollController = ScrollController();
+
   late VideoPlayerController controller;
 
-  static const double minExtent = 0.23;
-  static const double maxExtent = 0.84;
 
-  double initialExtent = minExtent;
 
   late Timer timer;
 
@@ -51,20 +52,16 @@ class _MyHomePageState extends State<MyHomePage> {
   String fortune = "LOVE";
   String fortuneTextHolder = "";
 
-  int selectedItemIndex = 0;
-  late String selectedItem;
-  bool showAllFortunes = false;
+
+
 
   String fortunesHolder = "";
-  List<Widget> dateContainer =  <Widget>[];
-  final List<String> _dates = <String>[];
   bool created = false;
 
   final List<String> allFortunes = <String>[];
 
   late String _state ;
 
-  int lenOfFortune = 4;
 
   // ignore: prefer_typing_uninitialized_variables
   late var _instagram;
@@ -79,34 +76,40 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int numberOfFortune = 0;
   late String yellowStickPath = "";
+  var fortuneOp;
+  var calenderWidget;
+
 
 
   // built in functions
   @override
   void initState() {
     super.initState();
+
+    fortuneOp = FortuneOperations(fortuneOpCallback, widget.storage);
+
+    calenderWidget = CalenderWidget(calenderCallback, widget.storage, fortuneOp, screenWidth, screenHeight, context);
+
+    _instagram = InstagramShare(screenWidth, screenHeight, context);
+
+    _state = widget.state;
+    _rebuild();
+
     widget.storage.readTime().then((value) {
       setState(() {
         _readTime = DateTime.parse(value);
       });
     });
 
-    _state = widget.state;
-    _rebuild();
-
-    _instagram = InstagramShare(screenWidth, screenHeight, context);
-
-    readDates();
+    calenderWidget.readDates();
 
     // in the opening show current day fortune
-    DateTime now = DateTime.now();
-    var formatter = DateFormat('yyyy-MMM-dd');
-    String formattedDate = formatter.format(now);
-    readFortunesFromLocalStorage(formattedDate);
+    String formattedDate = fortuneOp.getTodayDateFormatted();
+    fortuneOp.readFortunesFromLocalStorage(formattedDate);
 
     timer = Timer.periodic(const Duration(milliseconds: 1000), (Timer t) =>
         setState(() {
-          _timerJob(formattedDate);
+          _timerJob();
         }));
 
     _loadBanner();
@@ -114,6 +117,36 @@ class _MyHomePageState extends State<MyHomePage> {
     _loadVideoPlayer();
 
   }
+
+  void calenderCallback(typeOfOp){
+    if(typeOfOp == TypeOfCalenderOperations.rebuild){
+      _rebuild();
+    }
+  }
+
+  void fortuneOpCallback(typeOfOp, value) {
+    setState(() {
+      if(typeOfOp == TypeOfFortuneOperations.getLastFortune){
+        fortuneTextHolder = value;
+      }
+      else if(typeOfOp == TypeOfFortuneOperations.readFortunesFromLocalStorage){
+        allFortunes.clear();
+        List<String> lFortune = value.split("\n");
+        for( var l in lFortune){
+          if(l != ""){
+            allFortunes.add(l);
+          }
+        }
+      }
+      else if(typeOfOp == TypeOfFortuneOperations.getFortune){
+        fortune = value;
+      }
+      else if(typeOfOp == TypeOfFortuneOperations.getNumberOfFortunesForToday){
+        numberOfFortune = value;
+      }
+    });
+  }
+
 
   Future<bool> _onWillPop() async {
     return false; //<-- SEE HERE
@@ -129,14 +162,14 @@ class _MyHomePageState extends State<MyHomePage> {
             child:
             Stack(
                 children: [
-                  backgroundImageWidget(),
+                  backgroundImageWidget(screenWidth, screenHeight),
                   tapButtonOrVideoWidget(),
                   shownFortuneAtTheEndOfVideoWidget(),
                   shareOnInstagram(),
                   logoWidget(),
                   mainPageBackgroundTextsWidget(),
                   tapHereTextWidget(),
-                  calenderMenuWidget(),
+                  calenderWidget.calenderMenuWidget(_state, allFortunes),
                   bannerAdWidget()
                 ]
             )
@@ -464,6 +497,24 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+
+  Widget logoWidget(){
+    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DoNotHaveChanceState") {
+      return
+        Container(
+          alignment: Alignment.topCenter,
+          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 15.4, 0.0, 0.0),
+          child: Image.asset( "images/logo.png" ,
+            fit: BoxFit.cover,
+            width: screenWidth/ 4.3,
+          ),
+        );
+    }
+    else {
+      return Container();
+    }
+  }
+
   Widget tapButtonOrVideoWidget(){
     if(_state == "beginningState" || _state == "SecondChanceState") {
       return Container(
@@ -473,15 +524,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (tappable) {
                   tappable = false;
                   _state = "videoShownState";
-                  _getNumberOfFortunesForToday();
+                  fortuneOp.getNumberOfFortunesForToday();
+
                   // in the opening show current day fortune
                   DateTime now = DateTime.now();
                   var formatter = DateFormat('yyyy-MMM-dd');
                   String formattedDate = formatter.format(now);
-                  readFortunesFromLocalStorage(formattedDate);
+                  fortuneOp.readFortunesFromLocalStorage(formattedDate);
                   _rebuild();
 
-                  getFortune();
+                  fortuneOp.getFortune(allFortunes);
                   DateTime time = DateTime.now();
                   widget.storage.writeTime(time.toIso8601String());
                   _readTime = time;
@@ -502,23 +554,23 @@ class _MyHomePageState extends State<MyHomePage> {
     else if(_state == "videoShownState" || _state == "EndOfVideoState" ){
       return
         GestureDetector(
-            onTap: () {
-              if(_state == "EndOfVideoState"){
-                if (numberOfFortune < 4){
-                  _state="SecondChanceState";
-                }
-                else {
-                  _state="DoNotHaveChanceState";
-                }
-                _rebuild();
+          onTap: () {
+            if(_state == "EndOfVideoState"){
+              if (numberOfFortune < 4){
+                _state="SecondChanceState";
               }
-            },
-            child: Container(
-            padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, screenHeight/ 35),
-            color: const Color.fromRGBO(249, 249, 250, 1.0),
-            alignment: Alignment.center,
-            child:
-            Transform.scale(
+              else {
+                _state="DoNotHaveChanceState";
+              }
+              _rebuild();
+            }
+          },
+          child: Container(
+              padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, screenHeight/ 35),
+              color: const Color.fromRGBO(249, 249, 250, 1.0),
+              alignment: Alignment.center,
+              child:
+              Transform.scale(
                 alignment: Alignment.center,
                 scale: 1.08,
                 child:Container(
@@ -527,7 +579,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: screenWidth,
                   child: VideoPlayer(controller),
                 ),
-            )
+              )
 
 
           ),
@@ -554,134 +606,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
   }
-
-  Widget logoWidget(){
-    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DoNotHaveChanceState") {
-      return
-        Container(
-          alignment: Alignment.topCenter,
-          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 15.4, 0.0, 0.0),
-          child: Image.asset( "images/logo.png" ,
-            fit: BoxFit.cover,
-            width: screenWidth/ 4.3,
-          ),
-        );
-    }
-    else {
-      return Container();
-    }
-  }
-
-  Widget calenderMenuWidget() {
-    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DoNotHaveChanceState") {
-      return  SizedBox.expand(
-          child: NotificationListener<DraggableScrollableNotification>(
-            onNotification: (DraggableScrollableNotification dSNotification)
-            {
-              if(dSNotification.extent>=0.50){
-
-                setState(() {
-                  showAllFortunes = true;
-                  readFortunesFromLocalStorage(selectedItem);
-                });
-              }
-              else if(dSNotification.extent<0.50){
-                setState(() {
-                  showAllFortunes = false;
-                  readFortunesFromLocalStorage(selectedItem);
-                });
-              }
-              return true;
-            },
-            child:
-            DraggableScrollableSheet(
-              minChildSize: minExtent,
-              maxChildSize: maxExtent,
-              initialChildSize: initialExtent,
-              snap: true,
-              builder: _draggableScrollableSheetBuilder,
-            ),
-          ));
-    }
-    else {
-      return Container();
-    }
-  }
-
-  Widget allFortunesWidget() {
-    return Column(
-      children: [
-        for (int i = 0; i < allFortunes.length ; i++)
-          Column(
-            children: [
-              SizedBox(height: screenHeight / 50),
-              Text(allFortunes[i],
-              style: generalBoldTextWithFont(context, 20.0),),
-              SizedBox(height: screenHeight / 50),
-              if(i != allFortunes.length - 1)
-                Image.asset( "images/ellipse_yellow.png" ,
-                  fit: BoxFit.cover,
-                  width: screenWidth/ 50,
-                ),
-            ],
-        ),
-      ],
-    );
-  }
-
-  Widget _draggableScrollableSheetBuilder(BuildContext context,
-      ScrollController scrollController,) {
-    return DecoratedBox(
-        decoration:  BoxDecoration(
-          borderRadius: BorderRadius.circular(0),
-          image: const DecorationImage(
-              image: AssetImage("images/calender.png"),
-              fit: BoxFit.fill
-          ),
-        ),
-        child: SingleChildScrollView(
-          controller: scrollController,
-          child:
-          Column(
-            children: [
-              SizedBox(height: screenHeight/ 93.2),
-              Image.asset( "images/scrollThick.png" ,
-                fit: BoxFit.cover,
-                width: screenWidth/ 2.15,
-              ),
-              Center(
-                child:SingleChildScrollView(
-                  controller: _scrollController,
-                  reverse: true,
-                  padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 46.5, 0.0, screenHeight/ 46.5),
-                  scrollDirection: Axis.horizontal,
-                  child: datesWidget(context),
-                ),
-              ),
-              SizedBox(height: screenHeight / 12,),
-              Container(
-                alignment: Alignment.center,
-                child: allFortunesWidget()
-              )
-
-            ],
-          ),
-        )
-    );
-  }
-
-  Widget backgroundImageWidget(){
-    return GestureDetector(// Image tapped
-      child: SizedBox(
-        width: screenWidth,
-        height: screenHeight,
-        child: Image.asset( "images/background_pattern.png" ,
-          fit: BoxFit.fill,
-        ),
-      ),
-    );
-  }
-
   Widget shownFortuneAtTheEndOfVideoWidget() {
     if(_state == "beginningState"  || _state == "videoShownState"  || _state == "SecondChanceState"  || _state == "EndOfVideoState"){
       return Container(
@@ -701,59 +625,12 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Widget datesWidget(BuildContext context) {
-    return Wrap(
-      children: [
-        for (var t in dateContainer)
-          Wrap(
-            children: [
-              SizedBox(width: screenWidth / 20), // screenWidth / 20 = date spacer width
-              SizedBox(
-                  width: (screenWidth / 5) - (screenWidth / 20), // screenWidth / 5 - (screenWidth / 20) = date width
-                  height: (screenWidth / 5) - (screenWidth / 20),
-                  child: t
-              ),
-            ],
-          ),
-        SizedBox(width: screenWidth / 20),
-      ],
-    );
-  }
 
-  Widget dateContainerWidget(String item) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          reCreateDate(item);
-          readFortunesFromLocalStorage(item);
-        });
-      }, // Image tapped
-      child:
-      Stack(
-        children: [
-          Image.asset( selectedItem == item ? "images/ellipse_yellow.png" : "images/ellipse_orange.png",
-            fit: BoxFit.contain,
-          ),
-          Container(
-            alignment: Alignment.center,
-            child: Column(
-              children: [
-                const Spacer(),
-                Text(item.split("-")[2],
-                    style: dateContainerStyle(context)),
-                Text(item.split("-")[1],
-                    style: dateContainerStyle(context)),
-                const Spacer(),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
+
+
   
   // inner functions
-  void _timerJob(String formattedDate) {
+  void _timerJob() {
 
     // Write time to
     if(controller.value.position >=
@@ -770,7 +647,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // create date container and scroll
     if(created == false){
-      reCreateDate(formattedDate);
+      DateTime now = DateTime.now();
+      var formatter = DateFormat('yyyy-MMM-dd');
+      String formattedDate = formatter.format(now);
+      calenderWidget.reCreateDate(formattedDate);
       created = true;
     }
 
@@ -781,16 +661,6 @@ class _MyHomePageState extends State<MyHomePage> {
       _state= "beginningState";
       _rebuild();
     }
-  }
-
-  void _loadVideoPlayer(){
-    controller = VideoPlayerController.asset('images/square_animation.mp4');
-    controller.addListener(() {
-      setState(() {});
-    });
-    controller.initialize().then((value){
-      setState(() {});
-    });
   }
 
   void _loadBanner() {
@@ -818,195 +688,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _rebuild() {
-    if (_state == "beginningState") {
-      tappable = true;
-      yellowStickPath = "images/hello_stick.png";
-      boldMainText = "Hello !";
-      softMainText = "You are very close to knowing \n"
-          "what will happen in your life \n"
-          "today ...";
-      fortuneTextHolder = "";
-    }
-    else if (_state == "SecondChanceState") {
-      tappable = false;
-      yellowStickPath = "images/hello_stick.png";
-      boldMainText = "Today's fortune";
-      softMainText = "What an amazing day awaits you !\n"
-          "Now, you can share this fortune with \n"
-          "your friends or get another fortune";
-      _getLastFortune();
-    }
-    else if (_state == "DoNotHaveChanceState") {
-      yellowStickPath = "images/stick_grey.png";
-      boldMainText = "Sorry !";
-      softMainText = "You have reached the daily \n"
-          "fortune limit. Try again for a \n"
-          "new fortune after 24 hours";
-      fortuneTextHolder = "";
-    }
-    setState(() {
-    });
-  }
-
-  void _scrollDown() {
-
-    double margin = (screenWidth / 20) / 2;
-    double jumpPosition = margin;
-
-    if (selectedItemIndex <= 3){
-      jumpPosition = jumpPosition;
-    }
-    else {
-      double step = (screenWidth / 5);
-      jumpPosition = jumpPosition + (selectedItemIndex - 3) * step;
-    }
-
-    if(jumpPosition > _scrollController.position.maxScrollExtent){
-      jumpPosition = _scrollController.position.maxScrollExtent - margin;
-    }
-
-    // because of reverse
-    jumpPosition = _scrollController.position.maxScrollExtent - jumpPosition;
-
-    _scrollController.animateTo(
-      jumpPosition,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.fastOutSlowIn,
-    );
-  }
-
-  void readDates() {
-    widget.storage.readDates().then((value) {
-      setState(() {
-
-        DateTime now = DateTime.now();
-        DateTime twoDayAfterNow = now.add(const Duration(days: 2, minutes: 20));
-        var formatter = DateFormat('yyyy-MMM-dd');
-
-        DateTime startDate;
-        // control initial date is empty case
-        if (value == ""){
-          startDate = now.add(const Duration(days: - 3));
-        }
-        else{
-          startDate = formatter.parse(value);
-          // if start date close to now date
-          if (startDate.compareTo(now.add(const Duration(days: - 3))) > 0){
-            startDate = now.add(const Duration(days: - 3));
-          }
-        }
-
-        // clear _dates list
-        _dates.clear();
-
-        while ( startDate.compareTo(twoDayAfterNow) < 0) {
-          String formattedDate = formatter.format(startDate);
-          _dates.add(formattedDate);
-
-          startDate = startDate.add(const Duration(days: 1));
-        }
-      });
-    });
-  }
-
-  void reCreateDate(String sItem){
-    selectedItem = sItem;
-    dateContainer.clear();
-    int count = 1;
-    for (var item in _dates){
-      dateContainer.add(dateContainerWidget(item));
-      if(item == selectedItem){
-        selectedItemIndex = count;
-      }
-      count = count + 1;
-    }
-    _scrollDown();
-  }
-
-  void readFortunesFromLocalStorage(String date){
-    print("read");
-    widget.storage.readFortunesForDate(date).then((value) {
-      setState(() {
-        allFortunes.clear();
-        List<String> lFortune = value.split("\n");
-        for( var l in lFortune){
-          if(l != ""){
-            allFortunes.add(l);
-          }
-        }
-      });
-    });
-  }
-
-
-  Future<void> getFortuneV1() async {
-    String response = await get_fortune_();
-    if (response.isNotEmpty) {
-      setState(() {
-        dynamic jj = jsonDecode(response);
-        fortune = jj['data']['fortune'];
-
-        lenOfFortune = fortune.length;
-
-        // fortune to specific date
-        DateTime now = DateTime.now();
-        var formatter = DateFormat('yyyy-MMM-dd');
-        String formattedDate = formatter.format(now);
-        widget.storage.writeFortuneForDate(formattedDate, fortune);
-
-        // add first date to dates table
-        widget.storage.readDates().then((value) {
-          setState(() {
-            // if any date is included, pass
-            if(value.length > 1){}
-            else {
-              widget.storage.writeDates(formattedDate);
-            }
-          });
-        });
-      });
-    }
-  }
-
-  Future<void> getFortune() async {
-    widget.storage.getRandomFortune().then((value) {
-      setState(() {
-
-        print(value);
-        print(allFortunes);
-        // if new fortune exists in today's fortune retry
-        if (allFortunes.contains(value)){
-          print("retry");
-          getFortune();
-        }
-        else {
-          fortune = value;
-          lenOfFortune = fortune.length;
-
-          // fortune to specific date
-          DateTime now = DateTime.now();
-          var formatter = DateFormat('yyyy-MMM-dd');
-          String formattedDate = formatter.format(now);
-          widget.storage.writeFortuneForDate(formattedDate, fortune);
-
-          // add first date to dates table
-          widget.storage.readDates().then((value) {
-            setState(() {
-              // if any date is included, pass
-              if(value.length > 1){}
-              else {
-                widget.storage.writeDates(formattedDate);
-              }
-            });
-          });
-        }
-
-
-
-      });
-    });
-  }
 
   void _loadRewardedAd() {
     RewardedAd.load(
@@ -1037,40 +718,53 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _getLastFortune(){
-    String todayFortunes = "";
-    List<String> listOfFortune;
-    // read today's fortune number
-    DateTime now = DateTime.now();
-    var formatter = DateFormat('yyyy-MMM-dd');
-    String formattedDate = formatter.format(now);
-    widget.storage.readFortunesForDate(formattedDate).then((value) {
-      setState(() {
-        todayFortunes = value;
-        listOfFortune = todayFortunes.split("\n");
-        if(listOfFortune.isNotEmpty){
-          fortuneTextHolder = listOfFortune[listOfFortune.length - 2];
-        }
-      });
+  void _loadVideoPlayer(){
+    controller = VideoPlayerController.asset('images/square_animation.mp4');
+    controller.addListener(() {
+      setState(() {});
+    });
+    controller.initialize().then((value){
+      setState(() {});
     });
   }
 
-  void _getNumberOfFortunesForToday(){
-    String todayFortunes = "";
-
-    List<String> listOfFortune;
-    // read today's fortune number
-    DateTime now = DateTime.now();
-    var formatter = DateFormat('yyyy-MMM-dd');
-    String formattedDate = formatter.format(now);
-    widget.storage.readFortunesForDate(formattedDate).then((value) {
-      setState(() {
-        todayFortunes = value;
-        listOfFortune = todayFortunes.split("\n");
-        numberOfFortune = listOfFortune.length - 1;
-      });
+  void _rebuild() {
+    if (_state == "beginningState") {
+      tappable = true;
+      yellowStickPath = "images/hello_stick.png";
+      boldMainText = "Hello !";
+      softMainText = "You are very close to knowing \n"
+          "what will happen in your life \n"
+          "today ...";
+      fortuneTextHolder = "";
+    }
+    else if (_state == "SecondChanceState") {
+      tappable = false;
+      yellowStickPath = "images/hello_stick.png";
+      boldMainText = "Today's fortune";
+      softMainText = "What an amazing day awaits you !\n"
+          "Now, you can share this fortune with \n"
+          "your friends or get another fortune";
+      fortuneOp.getLastFortune();
+    }
+    else if (_state == "DoNotHaveChanceState") {
+      yellowStickPath = "images/stick_grey.png";
+      boldMainText = "Sorry !";
+      softMainText = "You have reached the daily \n"
+          "fortune limit. Try again for a \n"
+          "new fortune after 24 hours";
+      fortuneTextHolder = "";
+    }
+    setState(() {
     });
   }
+
+
+
+
+
+
+
 }
 
 
