@@ -79,11 +79,14 @@ class InstagramShare {
   Widget shownFortuneAtTheEndOfVideoWidget(String fortuneTextHolder) {
     return Container(
       alignment: Alignment.center,
-      padding: EdgeInsets.fromLTRB(0.0, screenHeight / 80, 0.0, screenWidth/43),
+      padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
       child: Container(
         alignment: Alignment.center,
+        width: 150,
+        height: 150,
         child: Text(
           fortuneTextHolder,
+          textAlign: TextAlign.center,
           style: endOfVideoTextStyle(context),
         ),
       ),

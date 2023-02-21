@@ -137,6 +137,8 @@ class StaticTextWidgets{
         alignment: Alignment.center,
         child: Container(
           alignment: Alignment.center,
+          width: 150,
+          height: 150,
           child: Text(
             fortuneText,
             textAlign: TextAlign.center,
