@@ -17,3 +17,7 @@ enum TypeOfTapButtonOrVideoOperations {
   videoShownStateOccurs,
   endOfVideoStateOccurs
 }
+
+enum TypeOfAdOperations {
+  rewardedAdShown
+}

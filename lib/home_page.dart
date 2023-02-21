@@ -9,6 +9,7 @@ import 'package:universal_io/io.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:video_player/video_player.dart';
+import 'ads_widgets.dart';
 import 'background_image_widgets.dart';
 import 'calenderWidgets.dart';
 import 'enums.dart';
@@ -41,8 +42,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   late Timer timer;
 
-  late BannerAd _ad;
-  bool isLoaded = false;
 
   bool tappable = false;
 
@@ -60,8 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late String _state ;
 
 
-  // ignore: prefer_typing_uninitialized_variables
-  late var _instagram;
+
 
   String boldMainText = "";
   String softMainText = "";
@@ -69,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late DateTime _readTime ;
   late String remainingTime = "0";
 
-  RewardedAd? _rewardedAd;
+
 
   int numberOfFortune = 0;
   late String yellowStickPath = "";
@@ -77,6 +75,8 @@ class _MyHomePageState extends State<MyHomePage> {
   var fortuneOp;
   var calenderWidget;
   var tabButtonOrVideoWidget;
+  var instagram;
+  var adsWidget;
 
 
   // built in functions
@@ -90,7 +90,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     tabButtonOrVideoWidget = TapButtonOrVideoWidget(tapButtonOrVideoCallback, widget.storage, fortuneOp, screenWidth, screenHeight, context);
 
-    _instagram = InstagramShare(screenWidth, screenHeight, context);
+    instagram = InstagramShare(screenWidth, screenHeight, context);
+
+    adsWidget = AdsWidgets(adsCallback, widget.storage, screenWidth, screenHeight);
 
     _state = widget.state;
     _rebuild();
@@ -112,8 +114,8 @@ class _MyHomePageState extends State<MyHomePage> {
           _timerJob();
         }));
 
-    _loadBanner();
-    _loadRewardedAd();
+    adsWidget.loadBanner();
+    adsWidget.loadRewardedAd();
     tabButtonOrVideoWidget.loadVideoPlayer();
 
   }
@@ -121,6 +123,14 @@ class _MyHomePageState extends State<MyHomePage> {
   // callbacks
   void calenderCallback(typeOfOp){
     if(typeOfOp == TypeOfCalenderOperations.rebuild){
+      _rebuild();
+    }
+  }
+
+  void adsCallback(typeOfOp){
+    if(typeOfOp == TypeOfAdOperations.rewardedAdShown){
+      tappable = true;
+      _state = "beginningState";
       _rebuild();
     }
   }
@@ -197,7 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainPageBackgroundTextsWidget(),
                   tapHereTextWidget(),
                   calenderWidget.calenderMenuWidget(_state, allFortunes),
-                  bannerAdWidget()
+                  adsWidget.bannerAdWidget(_state)
                 ]
             )
         ),
@@ -207,44 +217,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    if (Platform.isAndroid || Platform.isIOS) {
-      _ad.dispose();
-      _rewardedAd?.dispose();
-    }
+    adsWidget.dispose();
     super.dispose();
   }
 
   // widget functions
-  Widget bannerAdWidget() {
-    if ((_state == "beginningState" ||
-        _state == "SecondChanceState" ||
-        _state == "DoNotHaveChanceState" ) && isLoaded == true & (Platform.isAndroid || Platform.isIOS)) {
-      return
-        Column(
-            children: [
-              const Spacer(),
-              Row(
-                children: [
-                  const Spacer(),
-                  Container(
-                    width: _ad.size.width.toDouble(),
-                    height: _ad.size.height.toDouble(),
-                    alignment: Alignment.topCenter,
-                    child: AdWidget(
-                      ad: _ad,
-                    ),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-              SizedBox(height: (screenHeight / 50)),
-            ]
-        );
-    }
-    else {
-      return Container();
-    }
-  }
+
+
 
   Widget tapHereTextWidget(){
     if(_state == "beginningState"){
@@ -383,13 +362,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.deepPurpleAccent,
                       width: screenWidth,
                       height: screenHeight / 1.4,
-                      child: _instagram.instaShare(fortuneTextHolder)
+                      child: instagram.instaShare(fortuneTextHolder)
                     ),
                   ),
                 ),
                 GestureDetector(
                     onTap: () {
-                      _instagram.share_on_instagram();
+                      -instagram.share_on_instagram();
                     },
                     child:
                     Container(
@@ -478,20 +457,7 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(height: screenHeight / 100),
               GestureDetector(
                 onTap: () async{
-                  _rewardedAd?.show(
-                    onUserEarnedReward: (_, reward) {
-                      if (reward.amount >= 0){
-                        DateTime time = DateTime.now() ;
-                        // must be bigger than come_bach_after_hour of storage const variable
-                        const int comeBachAfterHour =  25;
-                        time = time.add(const Duration(hours: - comeBachAfterHour));
-                        widget.storage.writeTime(time.toIso8601String());
-                        tappable = true;
-                        _state = "beginningState";
-                        _rebuild();
-                      }
-                    },
-                  );
+                  adsWidget.showRewardedAds();
                 },
                 child: Container(
                     alignment: Alignment.center,
@@ -582,62 +548,6 @@ class _MyHomePageState extends State<MyHomePage> {
       _rebuild();
     }
   }
-
-  void _loadBanner() {
-    // Ad-mod initialized if mobile
-    if (Platform.isAndroid || Platform.isIOS) {
-      WidgetsFlutterBinding.ensureInitialized();
-      MobileAds.instance.initialize();
-    }
-
-    if (AdHelper.bannerAdUnitId != "UnsupportedPlatform"){
-      _ad = BannerAd(
-        size: AdSize.banner,
-        adUnitId: AdHelper.bannerAdUnitId,
-        request: const AdRequest(),
-        listener: BannerAdListener(
-            onAdLoaded: (_) {
-              setState(() {
-                isLoaded = true;
-              });
-            },
-            onAdFailedToLoad: (_, error) {}
-        ),
-      );
-      _ad.load();
-    }
-  }
-
-
-  void _loadRewardedAd() {
-    RewardedAd.load(
-      adUnitId: AdHelper.rewardedAdUnitId,
-      request: const AdRequest(),
-      rewardedAdLoadCallback: RewardedAdLoadCallback(
-        onAdLoaded: (ad) {
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) {
-              setState(() {
-                ad.dispose();
-                _rewardedAd = null;
-              });
-              _loadRewardedAd();
-            },
-          );
-
-          setState(() {
-            _rewardedAd = ad;
-          });
-        },
-        onAdFailedToLoad: (err) {
-          if (kDebugMode) {
-            print('Failed to load a rewarded ad: ${err.message}');
-          }
-        },
-      ),
-    );
-  }
-
 
 
   void _rebuild() {
