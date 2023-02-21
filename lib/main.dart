@@ -28,10 +28,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Fortune Teller',
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color.fromRGBO(
-            249, 249, 250, 1.0),
+        scaffoldBackgroundColor:  const Color.fromRGBO(248,185,51, 1.0),
       ),
       home: TransitionPage(title: "TODAY's MOTTO", storage: CounterStorage()),
+
     );
   }
 }

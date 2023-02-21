@@ -1,22 +1,8 @@
-import 'dart:async';
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:fortune_telling/styles.dart';
-import 'package:universal_io/io.dart';
-
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:video_player/video_player.dart';
 import 'enums.dart';
 import 'file_operations.dart';
-import 'fortune_operations.dart';
 import 'package:intl/intl.dart';
-import 'dart:ui';
-import 'ad_helper.dart';
-
-import 'instagram_share.dart';
-
 
 class CalenderWidget {
 
@@ -24,24 +10,17 @@ class CalenderWidget {
   late String selectedItem;
   int selectedItemIndex = 0;
 
-  static const double minExtent = 0.23;
-  static const double maxExtent = 0.84;
+  static const double minExtent = 0.23, maxExtent = 0.84;
   double initialExtent = minExtent;
 
   final ScrollController _scrollController = ScrollController();
 
-  late List<String> allFortunes = <String>[];
+  List<String> allFortunes = <String>[], dates = <String>[];
   List<Widget> dateContainer =  <Widget>[];
-  final List<String> _dates = <String>[];
-
 
   Function callback;
   CounterStorage storage;
-  var fortuneOp;
-
-  var screenWidth;
-  var screenHeight;
-  var context;
+  dynamic fortuneOp, screenWidth, screenHeight, context;
 
   CalenderWidget(this.callback,
       this.storage,
@@ -59,7 +38,6 @@ class CalenderWidget {
             onNotification: (DraggableScrollableNotification dSNotification)
             {
               if(dSNotification.extent>=0.50){
-
                 showAllFortunes = true;
                 fortuneOp.readFortunesFromLocalStorage(selectedItem);
               }
@@ -199,7 +177,7 @@ class CalenderWidget {
     selectedItem = sItem;
     dateContainer.clear();
     int count = 1;
-    for (var item in _dates){
+    for (var item in dates){
       dateContainer.add(dateContainerWidget(item));
       if(item == selectedItem){
         selectedItemIndex = count;
@@ -230,11 +208,11 @@ class CalenderWidget {
       }
 
       // clear _dates list
-      _dates.clear();
+      dates.clear();
 
       while ( startDate.compareTo(twoDayAfterNow) < 0) {
         String formattedDate = formatter.format(startDate);
-        _dates.add(formattedDate);
+        dates.add(formattedDate);
 
         startDate = startDate.add(const Duration(days: 1));
       }

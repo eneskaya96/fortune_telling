@@ -1,26 +1,16 @@
 import 'dart:async';
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:fortune_telling/share_and_replay_widgets.dart';
 import 'package:fortune_telling/static_image_widgets.dart';
 import 'package:fortune_telling/static_text_widgets.dart';
-import 'package:fortune_telling/styles.dart';
 import 'package:fortune_telling/tap_button_or_video_widgets.dart';
-import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:video_player/video_player.dart';
 import 'ads_widgets.dart';
 import 'calenderWidgets.dart';
 import 'enums.dart';
 import 'file_operations.dart';
 import 'fortune_operations.dart';
-import 'package:intl/intl.dart';
 import 'dart:ui';
-import 'ad_helper.dart';
-
 import 'instagram_share.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -33,7 +23,6 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-
 class _MyHomePageState extends State<MyHomePage> {
 
   // Screen size in density independent pixels
@@ -42,34 +31,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   late Timer timer;
 
-  bool tappable = false;
+  bool tappable = false, created = false;
 
-  String fortune = "";
-  String fortuneText = "";
-
-  bool created = false;
+  String fortune = "", fortuneText = "",  boldMainText = "", softMainText = "", remainingTime = "00:00:00", yellowStickPath = "";
 
   final List<String> allFortunes = <String>[];
 
   late String _state ;
 
-  String boldMainText = "";
-  String softMainText = "";
-
   late DateTime _readTime ;
-  String remainingTime = "00:00:00";
 
   int numberOfFortune = 0;
-  late String yellowStickPath = "";
 
-  var fortuneOp;
-  var calenderWidget;
-  var tabButtonOrVideoWidget;
-  var instagram;
-  var adsWidget;
-  var staticTextWidgets;
-  var staticImageWidgets;
-  var shareAndReplayWidgets;
+  dynamic fortuneOp, calenderWidget, tabButtonOrVideoWidget, instagram, adsWidget, staticTextWidgets, staticImageWidgets, shareAndReplayWidgets;
 
   // built in functions
   @override

@@ -1,5 +1,3 @@
-
-
 enum TypeOfFortuneOperations {
   getLastFortune,
   readFortunesFromLocalStorage,

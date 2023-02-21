@@ -8,21 +8,14 @@ import 'package:screenshot/screenshot.dart';
 import 'package:flutter/material.dart';
 import 'package:social_share/social_share.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:ui';
 
 
 class InstagramShare {
-  var screenWidth;
-  var screenHeight;
-  var context;
+  dynamic screenWidth, screenHeight, context;
   late String date;
 
   // constructor
-  InstagramShare(var screenWidth, var screenHeight, var context) {
-    this.screenWidth = screenWidth;
-    this.screenHeight = screenHeight;
-    this.context = context;
-
+  InstagramShare(this.screenWidth, this.screenHeight, this.context) {
     DateTime now = DateTime.now();
     var formatter = DateFormat('dd.MM.yyyy');
     date = formatter.format(now);
@@ -55,7 +48,6 @@ class InstagramShare {
   Future<String?> screenshot() async {
     var data = await screenshotController.capture();
     if (data == null) {
-      print("xxx");
       return null;
     }
     final tempDir = await getTemporaryDirectory();
