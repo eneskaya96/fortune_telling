@@ -10,7 +10,6 @@ import 'package:universal_io/io.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:video_player/video_player.dart';
-import 'background_image_widgets.dart';
 import 'enums.dart';
 import 'file_operations.dart';
 import 'http_request.dart';

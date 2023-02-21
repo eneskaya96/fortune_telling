@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:fortune_telling/static_image_widgets.dart';
+import 'package:fortune_telling/static_text_widgets.dart';
 import 'package:fortune_telling/styles.dart';
 import 'package:fortune_telling/tap_button_or_video_widgets.dart';
 import 'package:universal_io/io.dart';
@@ -10,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:video_player/video_player.dart';
 import 'ads_widgets.dart';
-import 'background_image_widgets.dart';
 import 'calenderWidgets.dart';
 import 'enums.dart';
 import 'file_operations.dart';
@@ -38,36 +39,24 @@ class _MyHomePageState extends State<MyHomePage> {
   var screenWidth = (window.physicalSize.shortestSide / window.devicePixelRatio);
   var screenHeight = (window.physicalSize.longestSide / window.devicePixelRatio);
 
-
-
   late Timer timer;
-
 
   bool tappable = false;
 
-  String fortune = "LOVE";
-  String fortuneTextHolder = "";
+  String fortune = "";
+  String fortuneText = "";
 
-
-
-
-  String fortunesHolder = "";
   bool created = false;
 
   final List<String> allFortunes = <String>[];
 
   late String _state ;
 
-
-
-
   String boldMainText = "";
   String softMainText = "";
 
   late DateTime _readTime ;
-  late String remainingTime = "0";
-
-
+  String remainingTime = "00:00:00";
 
   int numberOfFortune = 0;
   late String yellowStickPath = "";
@@ -77,7 +66,8 @@ class _MyHomePageState extends State<MyHomePage> {
   var tabButtonOrVideoWidget;
   var instagram;
   var adsWidget;
-
+  var staticTextWidgets;
+  var staticImageWidgets;
 
   // built in functions
   @override
@@ -94,6 +84,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     adsWidget = AdsWidgets(adsCallback, widget.storage, screenWidth, screenHeight);
 
+    staticTextWidgets = StaticTextWidgets(screenWidth, screenHeight, context);
+
+    staticImageWidgets = StaticImageWidgets(screenWidth, screenHeight, context);
+
     _state = widget.state;
     _rebuild();
 
@@ -102,7 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
         _readTime = DateTime.parse(value);
       });
     });
-
     calenderWidget.readDates();
 
     // in the opening show current day fortune
@@ -153,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _rebuild();
     }
     else if(typeOfOp == TypeOfTapButtonOrVideoOperations.videoShownStateOccurs){
-      fortuneTextHolder = fortune;
+      fortuneText = fortune;
     }
     else if(typeOfOp == TypeOfTapButtonOrVideoOperations.endOfVideoStateOccurs){
       _state= "EndOfVideoState";
@@ -164,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void fortuneOpCallback(typeOfOp, value) {
     setState(() {
       if(typeOfOp == TypeOfFortuneOperations.getLastFortune){
-        fortuneTextHolder = value;
+        fortuneText= value;
       }
       else if(typeOfOp == TypeOfFortuneOperations.readFortunesFromLocalStorage){
         allFortunes.clear();
@@ -199,13 +192,13 @@ class _MyHomePageState extends State<MyHomePage> {
             child:
             Stack(
                 children: [
-                  backgroundImageWidget(screenWidth, screenHeight),
+                  staticImageWidgets.backgroundImageWidget(),
                   tabButtonOrVideoWidget.tapButtonOrVideoWidget(_state, tappable, allFortunes),
-                  shownFortuneAtTheEndOfVideoWidget(),
+                  staticTextWidgets.shownFortuneAtTheEndOfVideoWidget(_state, fortuneText),
                   shareOnInstagram(),
-                  logoWidget(),
-                  mainPageBackgroundTextsWidget(),
-                  tapHereTextWidget(),
+                  staticImageWidgets.logoWidget(_state),
+                  staticTextWidgets.mainPageBackgroundTextsWidget(_state, yellowStickPath, boldMainText, softMainText),
+                  staticTextWidgets.tapHereTextWidget(_state, remainingTime),
                   calenderWidget.calenderMenuWidget(_state, allFortunes),
                   adsWidget.bannerAdWidget(_state)
                 ]
@@ -222,130 +215,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // widget functions
-
-
-
-  Widget tapHereTextWidget(){
-    if(_state == "beginningState"){
-      return Container(
-          alignment: Alignment.center,
-          padding: EdgeInsets.fromLTRB(0.0, screenHeight / 4.0, 0.0, screenWidth/43),
-          child:
-          Container(
-            width: screenWidth / 3.5,
-            child: FittedBox(
-              fit: BoxFit.fitWidth,
-              child: Text("Tap for fortune !",
-                style: generalBoldText(context, 20.0),
-              ),
-            )
-          )
-      );
-    }
-    else if(_state == "SecondChanceState" || _state == "DoNotHaveChanceState"){
-      return Container(
-          alignment: Alignment.center,
-          padding: EdgeInsets.fromLTRB(0.0, screenHeight / 1.66, 0.0, screenWidth/43),
-          child: Column (
-            children: [
-              Container(
-                  width: screenWidth / 2.5,
-                  alignment: Alignment.center,
-                  child: FittedBox(
-                    fit: BoxFit.fitWidth,
-                    child: Text("Remaining time to \n "
-                      "the next day's fortune",
-                    textAlign: TextAlign.center,
-                    style: remainingTimeText(context),
-                  ),
-                )
-              ),
-              SizedBox(
-                height: screenHeight/ 250,
-              ),
-              Container(
-                alignment: Alignment.center,
-                width: screenWidth/4,
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Text(remainingTime,
-                    textAlign: TextAlign.center,
-                    style: remainingTimeT(context),
-                  ),
-                )
-              )
-            ],
-          )
-
-      );
-    }
-    else {
-      return Container();
-    }
-  }
-
-  Widget mainPageBackgroundTextsWidget(){
-    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DoNotHaveChanceState"){
-      return Container(
-          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 5.4, 0.0, 10.0),
-          child:
-          Container(
-            alignment: Alignment.center,
-            //color: Colors.black,
-            child: Column(
-              children: [
-                Stack(
-                  children: [
-                    Container(
-                      //color: Colors.blue,
-                      padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, screenHeight / 155.0),// 15
-                      alignment: Alignment.bottomCenter,
-                      height: screenHeight / 46.6 * 2,
-                      child: Image.asset(yellowStickPath,
-                        width:  screenWidth / 1.60,
-                        height: screenHeight / 146.4, // padding + this should be equal to font size = 5
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Container(
-                      //color: Colors.red,
-                      alignment: Alignment.bottomCenter,
-                      height: screenHeight / 46.6 * 2, // should  be equal to text font size = 20
-                      //width: 200,
-                      child: FittedBox(
-                        fit: BoxFit.fitWidth,
-                        child: Text(boldMainText,
-                          style: generalBoldText(context, 35.0),
-                        ),
-                      )
-
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: screenHeight / 100.4,
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  width: screenWidth / 1.60,
-                  child: FittedBox(
-                    fit: BoxFit.fitWidth,
-                    child:  Text(softMainText,
-                      textAlign: TextAlign.center,
-                      style:generalThinTextStyle(context, screenWidth / 23.88),
-                    ),
-                  )
-                ),
-              ],
-            ),
-          )
-      );
-    }
-    else {
-      return Container();
-    }
-  }
-
   void _showMaterialDialog() {
     showDialog(
         context: context,//this works
@@ -362,7 +231,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.deepPurpleAccent,
                       width: screenWidth,
                       height: screenHeight / 1.4,
-                      child: instagram.instaShare(fortuneTextHolder)
+                      child: instagram.instaShare(fortuneText)
                     ),
                   ),
                 ),
@@ -397,7 +266,6 @@ class _MyHomePageState extends State<MyHomePage> {
             )
         );
   }
-
 
   Widget shareOnInstagram() {
     if(_state == "EndOfVideoState") {
@@ -490,65 +358,22 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-
-  Widget logoWidget(){
-    if(_state == "beginningState" || _state == "SecondChanceState" || _state == "DoNotHaveChanceState") {
-      return
-        Container(
-          alignment: Alignment.topCenter,
-          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 15.4, 0.0, 0.0),
-          child: Image.asset( "images/logo.png" ,
-            fit: BoxFit.cover,
-            width: screenWidth/ 4.3,
-          ),
-        );
-    }
-    else {
-      return Container();
-    }
-  }
-
-
-  Widget shownFortuneAtTheEndOfVideoWidget() {
-    if(_state == "beginningState"  || _state == "videoShownState"  || _state == "SecondChanceState"  || _state == "EndOfVideoState"){
-      return Container(
-        alignment: Alignment.center,
-        child: Container(
-          alignment: Alignment.center,
-          child: Text(
-            fortuneTextHolder,
-            textAlign: TextAlign.center,
-            style: endOfVideoTextStyle(context),
-          ),
-        ),
-      );
-    }
-    else{
-      return  Container();
-    }
-  }
-
   // inner functions
   void _timerJob() {
-
     // create date container and scroll
     if(created == false){
-      DateTime now = DateTime.now();
-      var formatter = DateFormat('yyyy-MMM-dd');
-      String formattedDate = formatter.format(now);
+      String formattedDate = fortuneOp.getTodayDateFormatted();
       calenderWidget.reCreateDate(formattedDate);
       created = true;
     }
 
     remainingTime = widget.storage.getRemainigTime(_readTime);
-    //print(_state);
     if (remainingTime == "00:00:00" && (_state == "SecondChanceState" || _state == "DoNotHaveChanceState")) {
       tappable = true;
       _state= "beginningState";
       _rebuild();
     }
   }
-
 
   void _rebuild() {
     if (_state == "beginningState") {
@@ -558,7 +383,7 @@ class _MyHomePageState extends State<MyHomePage> {
       softMainText = "You are very close to knowing \n"
           "what will happen in your life \n"
           "today ...";
-      fortuneTextHolder = "";
+      fortuneText = "";
     }
     else if (_state == "SecondChanceState") {
       tappable = false;
@@ -575,7 +400,7 @@ class _MyHomePageState extends State<MyHomePage> {
       softMainText = "You have reached the daily \n"
           "fortune limit. Try again for a \n"
           "new fortune after 24 hours";
-      fortuneTextHolder = "";
+      fortuneText = "";
     }
     setState(() {
     });
