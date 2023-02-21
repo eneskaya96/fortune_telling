@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:fortune_telling/share_and_replay_widgets.dart';
 import 'package:fortune_telling/static_image_widgets.dart';
 import 'package:fortune_telling/static_text_widgets.dart';
 import 'package:fortune_telling/styles.dart';
@@ -68,6 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
   var adsWidget;
   var staticTextWidgets;
   var staticImageWidgets;
+  var shareAndReplayWidgets;
 
   // built in functions
   @override
@@ -87,6 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
     staticTextWidgets = StaticTextWidgets(screenWidth, screenHeight, context);
 
     staticImageWidgets = StaticImageWidgets(screenWidth, screenHeight, context);
+
+    shareAndReplayWidgets = ShareAndRePlayWidget(adsWidget, instagram, screenWidth, screenHeight, context);
 
     _state = widget.state;
     _rebuild();
@@ -111,6 +115,42 @@ class _MyHomePageState extends State<MyHomePage> {
     adsWidget.loadRewardedAd();
     tabButtonOrVideoWidget.loadVideoPlayer();
 
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: const Color.fromRGBO(249, 249, 250, 1.0),
+        body: Center(
+            child:
+            Stack(
+                children: [
+                  staticImageWidgets.backgroundImageWidget(),
+                  tabButtonOrVideoWidget.tapButtonOrVideoWidget(_state, tappable, allFortunes),
+                  staticTextWidgets.shownFortuneAtTheEndOfVideoWidget(_state, fortuneText),
+                  shareAndReplayWidgets.shareOnInstagram(_state, fortuneText),
+                  staticImageWidgets.logoWidget(_state),
+                  staticTextWidgets.mainPageBackgroundTextsWidget(_state, yellowStickPath, boldMainText, softMainText),
+                  staticTextWidgets.tapHereTextWidget(_state, remainingTime),
+                  calenderWidget.calenderMenuWidget(_state, allFortunes),
+                  adsWidget.bannerAdWidget(_state)
+                ]
+            )
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _onWillPop() async {
+    return false; //<-- SEE HERE
+  }
+
+  @override
+  void dispose() {
+    adsWidget.dispose();
+    super.dispose();
   }
 
   // callbacks
@@ -175,187 +215,6 @@ class _MyHomePageState extends State<MyHomePage> {
         numberOfFortune = value;
       }
     });
-  }
-
-
-  Future<bool> _onWillPop() async {
-    return false; //<-- SEE HERE
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        backgroundColor: const Color.fromRGBO(249, 249, 250, 1.0),
-        body: Center(
-            child:
-            Stack(
-                children: [
-                  staticImageWidgets.backgroundImageWidget(),
-                  tabButtonOrVideoWidget.tapButtonOrVideoWidget(_state, tappable, allFortunes),
-                  staticTextWidgets.shownFortuneAtTheEndOfVideoWidget(_state, fortuneText),
-                  shareOnInstagram(),
-                  staticImageWidgets.logoWidget(_state),
-                  staticTextWidgets.mainPageBackgroundTextsWidget(_state, yellowStickPath, boldMainText, softMainText),
-                  staticTextWidgets.tapHereTextWidget(_state, remainingTime),
-                  calenderWidget.calenderMenuWidget(_state, allFortunes),
-                  adsWidget.bannerAdWidget(_state)
-                ]
-            )
-        ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    adsWidget.dispose();
-    super.dispose();
-  }
-
-  // widget functions
-  void _showMaterialDialog() {
-    showDialog(
-        context: context,//this works
-        builder: (context) =>
-            Column(
-              children: [
-                const Spacer(),
-                Container(
-                  alignment: Alignment.center,
-                  child: AlertDialog(
-                    contentPadding: const EdgeInsets.fromLTRB(0.0, 0, 0.0, 0.0),
-                    alignment: Alignment.center,
-                    content: Container(
-                      color: Colors.deepPurpleAccent,
-                      width: screenWidth,
-                      height: screenHeight / 1.4,
-                      child: instagram.instaShare(fortuneText)
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                    onTap: () {
-                      -instagram.share_on_instagram();
-                    },
-                    child:
-                    Container(
-                        alignment: Alignment.center,
-                        child: Image.asset("images/share_grey.png",
-                          width: screenWidth / 8,
-                          fit: BoxFit.contain,
-                        )
-                    )
-                ),
-                GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child:
-                    Container(
-                        alignment: Alignment.center,
-                        child: Image.asset("images/x.png",
-                          width: screenWidth / 8,
-                          fit: BoxFit.contain,
-                        )
-                    )
-                ),
-                const Spacer()
-              ],
-            )
-        );
-  }
-
-  Widget shareOnInstagram() {
-    if(_state == "EndOfVideoState") {
-      return  GestureDetector(
-        onTap: () async{
-          _showMaterialDialog();
-        },
-        child: Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.fromLTRB(0.0, screenWidth/ 1.4, 0.0, 10.0),
-            child: Container(
-                alignment: Alignment.center,
-                width: screenWidth / 15,
-                height: screenHeight / 26,
-                child: Image.asset("images/share_on_instagram_icon.png",
-                  fit: BoxFit.contain,
-                )
-            )
-        ),
-      );
-    }
-    else if(_state == "SecondChanceState") {
-      return  GestureDetector(
-        onTap: () async{
-          _showMaterialDialog();
-        },
-        child: Container(
-          alignment: Alignment.topRight,
-          padding: EdgeInsets.fromLTRB(0.0, screenHeight/ 2.37, screenWidth/ 21.5, 0.0),
-          child:Column(
-            children: [
-              GestureDetector(
-                onTap: () async{
-                  _showMaterialDialog();
-                },
-                child: Container(
-                    alignment: Alignment.center,
-                    width: screenWidth / 15,
-                    height: screenHeight / 26,
-                    child: Image.asset("images/share_on_instagram_icon.png",
-                      fit: BoxFit.contain,
-                    )
-                ),
-              ),
-              Container(
-                width: screenWidth / 7,
-                alignment: Alignment.center,
-                child: FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Text(" Share on\n "
-                      "Instagram",
-                    textAlign: TextAlign.center,
-                    style: shareIconText(context),
-                  )
-                ),
-              ),
-              SizedBox(height: screenHeight / 100),
-              GestureDetector(
-                onTap: () async{
-                  adsWidget.showRewardedAds();
-                },
-                child: Container(
-                    alignment: Alignment.center,
-                    width: screenWidth / 15,
-                    height: screenHeight / 26,
-                    child: Image.asset("images/replay_icon.png",
-                      fit: BoxFit.contain,
-                    )
-                ),
-              ),
-              Container(
-                width: screenWidth / 8,
-                alignment: Alignment.center,
-                child: FittedBox(
-                    fit: BoxFit.fitWidth,
-                    child: Text("For more \n"
-                        "Fortune",
-                      textAlign: TextAlign.center,
-                      style: shareIconText(context),
-                    )
-                ),
-              ),
-            ],
-          )
-        ),
-      );
-    }
-    else {
-      return Container();
-    }
   }
 
   // inner functions
