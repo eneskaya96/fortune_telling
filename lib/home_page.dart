@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:fortune_telling/styles.dart';
+import 'package:fortune_telling/tap_button_or_video_widgets.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
@@ -32,13 +33,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-
   // Screen size in density independent pixels
   var screenWidth = (window.physicalSize.shortestSide / window.devicePixelRatio);
   var screenHeight = (window.physicalSize.longestSide / window.devicePixelRatio);
-
-
-  late VideoPlayerController controller;
 
 
 
@@ -76,9 +73,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int numberOfFortune = 0;
   late String yellowStickPath = "";
+
   var fortuneOp;
   var calenderWidget;
-
+  var tabButtonOrVideoWidget;
 
 
   // built in functions
@@ -89,6 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
     fortuneOp = FortuneOperations(fortuneOpCallback, widget.storage);
 
     calenderWidget = CalenderWidget(calenderCallback, widget.storage, fortuneOp, screenWidth, screenHeight, context);
+
+    tabButtonOrVideoWidget = TapButtonOrVideoWidget(tapButtonOrVideoCallback, widget.storage, fortuneOp, screenWidth, screenHeight, context);
 
     _instagram = InstagramShare(screenWidth, screenHeight, context);
 
@@ -114,14 +114,41 @@ class _MyHomePageState extends State<MyHomePage> {
 
     _loadBanner();
     _loadRewardedAd();
-    _loadVideoPlayer();
+    tabButtonOrVideoWidget.loadVideoPlayer();
 
   }
 
+  // callbacks
   void calenderCallback(typeOfOp){
     if(typeOfOp == TypeOfCalenderOperations.rebuild){
       _rebuild();
     }
+  }
+
+  void tapButtonOrVideoCallback(typeOfOp){
+    if(typeOfOp == TypeOfTapButtonOrVideoOperations.tapButtonPressed){
+      tappable = false;
+      _state = "videoShownState";
+      DateTime time = DateTime.now();
+      _readTime = time;
+
+    }
+    else if(typeOfOp == TypeOfTapButtonOrVideoOperations.videoPressedAtTheEndOfVideo){
+      if (numberOfFortune < 4){
+        _state="SecondChanceState";
+      }
+      else {
+        _state="DoNotHaveChanceState";
+      }
+      _rebuild();
+    }
+    else if(typeOfOp == TypeOfTapButtonOrVideoOperations.videoShownStateOccurs){
+      fortuneTextHolder = fortune;
+    }
+    else if(typeOfOp == TypeOfTapButtonOrVideoOperations.endOfVideoStateOccurs){
+      _state= "EndOfVideoState";
+    }
+
   }
 
   void fortuneOpCallback(typeOfOp, value) {
@@ -163,7 +190,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Stack(
                 children: [
                   backgroundImageWidget(screenWidth, screenHeight),
-                  tapButtonOrVideoWidget(),
+                  tabButtonOrVideoWidget.tapButtonOrVideoWidget(_state, tappable, allFortunes),
                   shownFortuneAtTheEndOfVideoWidget(),
                   shareOnInstagram(),
                   logoWidget(),
@@ -515,97 +542,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Widget tapButtonOrVideoWidget(){
-    if(_state == "beginningState" || _state == "SecondChanceState") {
-      return Container(
-          alignment: Alignment.center,
-          child: GestureDetector(
-              onTap: () {
-                if (tappable) {
-                  tappable = false;
-                  _state = "videoShownState";
-                  fortuneOp.getNumberOfFortunesForToday();
 
-                  // in the opening show current day fortune
-                  DateTime now = DateTime.now();
-                  var formatter = DateFormat('yyyy-MMM-dd');
-                  String formattedDate = formatter.format(now);
-                  fortuneOp.readFortunesFromLocalStorage(formattedDate);
-                  _rebuild();
-
-                  fortuneOp.getFortune(allFortunes);
-                  DateTime time = DateTime.now();
-                  widget.storage.writeTime(time.toIso8601String());
-                  _readTime = time;
-                  controller.play();
-                }
-              }, // Image tapped
-              child: Container(
-                  alignment: Alignment.center,
-                  padding: EdgeInsets.fromLTRB(screenWidth/ 60, screenHeight/ 150, 0.0, 0.0),
-                  child: Image.asset("images/button.gif",
-                    width: screenWidth / 2,
-                    fit: BoxFit.contain,
-                  )
-              )
-          )
-      );
-    }
-    else if(_state == "videoShownState" || _state == "EndOfVideoState" ){
-      return
-        GestureDetector(
-          onTap: () {
-            if(_state == "EndOfVideoState"){
-              if (numberOfFortune < 4){
-                _state="SecondChanceState";
-              }
-              else {
-                _state="DoNotHaveChanceState";
-              }
-              _rebuild();
-            }
-          },
-          child: Container(
-              padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, screenHeight/ 35),
-              color: const Color.fromRGBO(249, 249, 250, 1.0),
-              alignment: Alignment.center,
-              child:
-              Transform.scale(
-                alignment: Alignment.center,
-                scale: 1.08,
-                child:Container(
-                  alignment: Alignment.center,
-                  width: screenWidth ,
-                  height: screenWidth,
-                  child: VideoPlayer(controller),
-                ),
-              )
-
-
-          ),
-        );
-    }
-    else if(_state == "DoNotHaveChanceState"){
-      return Container(
-          alignment: Alignment.center,
-          child: GestureDetector(
-              onTap: () {
-              }, // Image tapped
-              child: Container(
-                  alignment: Alignment.center,
-                  child: Image.asset("images/square_grey_animation.gif",
-                    width: screenWidth / 2,
-                    fit: BoxFit.contain,
-                  )
-              )
-          )
-      );
-    }
-    else {
-      return Container();
-    }
-
-  }
   Widget shownFortuneAtTheEndOfVideoWidget() {
     if(_state == "beginningState"  || _state == "videoShownState"  || _state == "SecondChanceState"  || _state == "EndOfVideoState"){
       return Container(
@@ -625,25 +562,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-
-
-
-  
   // inner functions
   void _timerJob() {
-
-    // Write time to
-    if(controller.value.position >=
-        controller.value.duration - const Duration(seconds: 9)
-        && _state == "videoShownState") {
-      fortuneTextHolder = fortune;
-    }
-
-    if(controller.value.position >=
-        controller.value.duration - const Duration(seconds: 6)
-        && _state == "videoShownState") {
-      _state= "EndOfVideoState";
-    }
 
     // create date container and scroll
     if(created == false){
@@ -718,15 +638,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _loadVideoPlayer(){
-    controller = VideoPlayerController.asset('images/square_animation.mp4');
-    controller.addListener(() {
-      setState(() {});
-    });
-    controller.initialize().then((value){
-      setState(() {});
-    });
-  }
+
 
   void _rebuild() {
     if (_state == "beginningState") {
@@ -759,12 +671,4 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-
-
-
-
-
-
 }
-
-

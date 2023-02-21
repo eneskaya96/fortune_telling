@@ -10,3 +10,10 @@ enum TypeOfFortuneOperations {
 enum TypeOfCalenderOperations {
   rebuild
 }
+
+enum TypeOfTapButtonOrVideoOperations {
+  tapButtonPressed,
+  videoPressedAtTheEndOfVideo,
+  videoShownStateOccurs,
+  endOfVideoStateOccurs
+}
