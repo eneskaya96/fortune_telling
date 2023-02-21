@@ -12,7 +12,7 @@ class TapButtonOrVideoWidget{
   Function callback;
   CounterStorage storage;
   dynamic fortuneOp, screenWidth, screenHeight,context;
-  
+
   TapButtonOrVideoWidget(this.callback,
       this.storage,
       this.fortuneOp,

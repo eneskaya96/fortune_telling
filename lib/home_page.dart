@@ -85,8 +85,6 @@ class _MyHomePageState extends State<MyHomePage> {
           _timerJob();
         }));
 
-    adsWidget.loadBanner();
-    adsWidget.loadRewardedAd();
     tabButtonOrVideoWidget.loadVideoPlayer();
 
   }

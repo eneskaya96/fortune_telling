@@ -13,7 +13,10 @@ class AdsWidgets{
 
   dynamic screenWidth, screenHeight;
 
-  AdsWidgets(this.callback, this.storage, this.screenWidth, this.screenHeight);
+  AdsWidgets(this.callback, this.storage, this.screenWidth, this.screenHeight){
+    loadBanner();
+    loadRewardedAd();
+  }
 
   late BannerAd _ad;
   bool isLoaded = false;
